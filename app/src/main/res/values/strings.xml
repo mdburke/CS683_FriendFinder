@@ -5,4 +5,5 @@
     <string name="button_edit_account_settings">Edit Account Settings</string>
     <string name="button_edit_profile">Edit Profile</string>
     <string name="button_search_for_friends">Search For Friends</string>
+    <string name="save_state_test_box">Save State Test Box</string>
 </resources>
