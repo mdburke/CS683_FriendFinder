@@ -25,7 +25,7 @@ public class HomeScreen extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         outputTextView = (TextView) findViewById(R.id.outputText);
-        initializeButtonListeners();
+        initializeOnClickListeners();
     }
 
     @Override
@@ -64,9 +64,8 @@ public class HomeScreen extends AppCompatActivity {
 
     /***** Private Helper Methods *******/
 
-
     @SuppressLint("SetTextI18n")
-    private void initializeButtonListeners() {
+    private void initializeOnClickListeners() {
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener((view) -> Snackbar
                 .make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
