@@ -1,6 +1,7 @@
 package com.imminentapps.friendfinder.activities;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -17,6 +18,7 @@ import com.imminentapps.friendfinder.R;
 public class HomeScreen extends AppCompatActivity {
     private static final String DEFAULT_TAG = "DefaultTag";
     private TextView outputTextView;
+    private TextView welcomeMessage;
 
     /******** Lifecycle Methods *********/
 
@@ -29,6 +31,13 @@ public class HomeScreen extends AppCompatActivity {
 
         // Initialize the outputTextView field and add listeners to the screen's buttons
         outputTextView = (TextView) findViewById(R.id.outputText);
+        welcomeMessage = (TextView) findViewById(R.id.textView);
+
+        Intent intent = getIntent();
+        CharSequence email = intent.getCharSequenceExtra("email");
+        Log.i("email", email.toString());
+        welcomeMessage.setText("Welcome, " + email);
+
         initializeOnClickListeners();
     }
 

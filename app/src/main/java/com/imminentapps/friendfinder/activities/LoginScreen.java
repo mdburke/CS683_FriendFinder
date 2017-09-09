@@ -282,6 +282,7 @@ public class LoginScreen extends AppCompatActivity implements LoaderCallbacks<Cu
 
     private void goToHomeScreen() {
         Intent intent = new Intent(this, HomeScreen.class);
+        intent.putExtra("email", mEmailView.getText());
         startActivity(intent);
     }
 
