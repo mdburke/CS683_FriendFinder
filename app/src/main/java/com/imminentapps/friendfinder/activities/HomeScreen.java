@@ -18,9 +18,9 @@ import com.imminentapps.friendfinder.R;
 public class HomeScreen extends AppCompatActivity {
     private static final String DEFAULT_TAG = "DefaultTag";
     private TextView outputTextView;
-    private TextView welcomeMessage;
+    private TextView welcomeMessageTextView;
 
-    /******** Lifecycle Methods *********/
+    //*********** Lifecycle Methods ************//
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,17 +29,19 @@ public class HomeScreen extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        // Initialize the outputTextView field and add listeners to the screen's buttons
+        // Initialize the outputTextView and welcomeMessageTextView fields
         outputTextView = (TextView) findViewById(R.id.outputText);
-        welcomeMessage = (TextView) findViewById(R.id.textView);
+        welcomeMessageTextView = (TextView) findViewById(R.id.textView);
 
+        // Grab the email from the loginScreen
         Intent intent = getIntent();
         CharSequence email = intent.getCharSequenceExtra("email");
         Log.i("email", email.toString());
 
         // TODO: Figure out how to internationalize by using vars in strings.xml
-        welcomeMessage.setText(getString(R.string.home_title) + " " + email.toString());
+        welcomeMessageTextView.setText(getString(R.string.home_title) + " " + email.toString());
 
+        // Initialize on click listeners for buttons
         initializeOnClickListeners();
     }
 
@@ -77,19 +79,21 @@ public class HomeScreen extends AppCompatActivity {
         outState.putCharSequence("OutputText", outputTextView.getText());
     }
 
-    /***** Private Helper Methods *******/
+    //************ Private Helper Methods *************//
 
     /**
      * Helper method that initializes the screen's buttons to have onClickListeners.
      * Buttons will log that they have been clicked for now, in place
      * of transitioning to other activities.
      */
-    @SuppressLint("SetTextI18n")
+    @SuppressLint("SetTextI18n")    // The offending strings are for tests only.
     private void initializeOnClickListeners() {
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener((view) -> Snackbar
                 .make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                 .setAction("Action", null).show());
+
+        // TODO: Make the following buttons transition to other activities
 
         Button searchForFriendsButton = (Button) findViewById(R.id.buttonSearchForFriends);
         searchForFriendsButton.setOnClickListener((view) -> {
