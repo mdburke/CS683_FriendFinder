@@ -36,7 +36,9 @@ public class HomeScreen extends AppCompatActivity {
         Intent intent = getIntent();
         CharSequence email = intent.getCharSequenceExtra("email");
         Log.i("email", email.toString());
-        welcomeMessage.setText("Welcome, " + email);
+
+        // TODO: Figure out how to internationalize by using vars in strings.xml
+        welcomeMessage.setText(getString(R.string.home_title) + " " + email.toString());
 
         initializeOnClickListeners();
     }
