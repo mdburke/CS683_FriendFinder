@@ -1,4 +1,4 @@
-package com.imminentapps.friendfinder;
+package com.imminentapps.friendfinder.activities;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;
@@ -12,6 +12,8 @@ import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.imminentapps.friendfinder.R;
+
 public class HomeScreen extends AppCompatActivity {
     private static final String DEFAULT_TAG = "DefaultTag";
     private TextView outputTextView;
@@ -24,6 +26,8 @@ public class HomeScreen extends AppCompatActivity {
         setContentView(R.layout.activity_home_screen);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        // Initialize the outputTextView field and add listeners to the screen's buttons
         outputTextView = (TextView) findViewById(R.id.outputText);
         initializeOnClickListeners();
     }
@@ -64,6 +68,11 @@ public class HomeScreen extends AppCompatActivity {
 
     /***** Private Helper Methods *******/
 
+    /**
+     * Helper method that initializes the screen's buttons to have onClickListeners.
+     * Buttons will log that they have been clicked for now, in place
+     * of transitioning to other activities.
+     */
     @SuppressLint("SetTextI18n")
     private void initializeOnClickListeners() {
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
