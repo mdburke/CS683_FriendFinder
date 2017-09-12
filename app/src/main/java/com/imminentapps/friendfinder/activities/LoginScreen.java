@@ -185,6 +185,7 @@ public class LoginScreen extends AppCompatActivity implements LoaderCallbacks<Cu
                 return false;
             }
 
+            // Check to see if user is registered to the mock database
             return userDatabase.getUsers().contains(new User(mEmail, mPassword));
         }
 

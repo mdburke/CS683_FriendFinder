@@ -20,7 +20,7 @@ public class HomeScreen extends AppCompatActivity {
     private TextView outputTextView;
     private TextView welcomeMessageTextView;
 
-    //*********** Lifecycle Methods ************//
+    //************* Lifecycle Methods ************//
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
