@@ -1,10 +1,10 @@
-package com.imminentapps.friendfinder.mocks;
+package com.imminentapps.friendfinder.domain;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * POJO to hold user information for mock database
+ * POJO to hold user information
  *
  * Created by mburke on 9/9/17.
  */
@@ -12,11 +12,17 @@ public class User {
     private String email;
     private String password;
     private List<User> friendsList;
+    private Profile profile;
 
-    public User(String email, String password) {
+    public User(String email, String password, Profile profile) {
         this.password = password;
         this.email = email;
+        this.profile = (profile != null) ? profile : new Profile();
         this.friendsList = new ArrayList<>();
+    }
+
+    public User(String email, String password) {
+        this(email, password, null);
     }
 
     public String getPassword() {

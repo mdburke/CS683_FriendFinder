@@ -18,7 +18,7 @@ import android.widget.EditText;
 
 import com.imminentapps.friendfinder.R;
 import com.imminentapps.friendfinder.mocks.MockUserDatabase;
-import com.imminentapps.friendfinder.mocks.User;
+import com.imminentapps.friendfinder.domain.User;
 
 /**
  * A login screen that offers login via email/password.

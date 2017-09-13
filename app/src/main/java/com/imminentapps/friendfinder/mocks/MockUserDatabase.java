@@ -1,6 +1,9 @@
 package com.imminentapps.friendfinder.mocks;
 
-import java.util.ArrayList;
+import com.imminentapps.friendfinder.domain.User;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Stores user information for use in application.
@@ -13,7 +16,7 @@ public class MockUserDatabase {
     private static final MockUserDatabase database = new MockUserDatabase();
 
     // List to hold users
-    private ArrayList<User> users;
+    private Map<String, User> users;
 
     // Private constructor
     private MockUserDatabase() {
@@ -23,12 +26,14 @@ public class MockUserDatabase {
     // Singleton accessor
     public static MockUserDatabase getDatabase() { return database; }
 
-    public ArrayList<User> getUsers() { return users; }
+    public Map<String, User> getUsers() { return users; }
 
     // Populates the list with fake data
     private void initializeMockDatabase() {
-        users = new ArrayList<>();
-        users.add(new User("user1@test.com", "Password1"));
-        users.add(new User("user2@test.com", "Password2"));
+        users = new HashMap<>();
+        users.put("user1@test.com", new User("user1@test.com", "Password1"));
+        users.put("user2@test.com", new User("user2@test.com", "Password2"));
+        users.put("user3@test.com", new User("user3@test.com", "Password3"));
+        users.put("user4@test.com", new User("user4@test.com", "Password4"));
     }
 }
