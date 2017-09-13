@@ -49,14 +49,6 @@
             android:layout_height="wrap_content"
             android:text="@string/button_edit_account_settings" />
 
-        <TextView
-            android:id="@+id/outputText"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="50dp"
-            android:text="@string/save_state_test_box"
-            android:textAlignment="center" />
-
     </LinearLayout>
 
 </android.support.constraint.ConstraintLayout>

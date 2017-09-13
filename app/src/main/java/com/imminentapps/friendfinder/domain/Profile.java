@@ -1,5 +1,6 @@
 package com.imminentapps.friendfinder.domain;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -12,9 +13,20 @@ public class Profile {
     private List<String> hobbies;
     private String username;
     private String aboutMeSection;
+    private String firstName;
+    private String lastName;
+
+    public Profile(List<String> hobbies, String username, String aboutMeSection,
+                   String firstName, String lastName) {
+        this.hobbies = (hobbies != null) ? hobbies : new ArrayList<>();
+        this.username = username;
+        this.aboutMeSection = aboutMeSection;
+        this.firstName = firstName;
+        this.lastName = lastName;
+    }
 
     public Profile(List<String> hobbies, String username, String aboutMeSection) {
-        this.hobbies = hobbies;
+        this.hobbies = (hobbies != null) ? hobbies : new ArrayList<>();
         this.username = username;
         this.aboutMeSection = aboutMeSection;
     }
@@ -43,6 +55,22 @@ public class Profile {
 
     public void setAboutMeSection(String aboutMeSection) {
         this.aboutMeSection = aboutMeSection;
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
     }
 
     @Override

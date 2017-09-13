@@ -18,7 +18,6 @@ import com.imminentapps.friendfinder.mocks.MockUserDatabase;
 public class HomeScreen extends AppCompatActivity {
     private static final MockUserDatabase userDatabase = MockUserDatabase.getDatabase();
     private static final String DEFAULT_TAG = "DefaultTag";
-    private TextView outputTextView;
     private TextView welcomeMessageTextView;
     private User currentUser;
 
@@ -32,7 +31,6 @@ public class HomeScreen extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         // Initialize the outputTextView and welcomeMessageTextView fields
-        outputTextView = (TextView) findViewById(R.id.outputText);
         welcomeMessageTextView = (TextView) findViewById(R.id.textView);
 
         // Grab the email from the loginScreen
@@ -76,26 +74,20 @@ public class HomeScreen extends AppCompatActivity {
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
-        outputTextView.setText(savedInstanceState.getCharSequence("OutputText"));
     }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putCharSequence("OutputText", outputTextView.getText());
     }
 
     //************ Private Helper Methods *************//
 
     /**
      * Helper method that initializes the screen's buttons to have onClickListeners.
-     * Buttons will log that they have been clicked for now, in place
-     * of transitioning to other activities.
      */
     @SuppressLint("SetTextI18n")    // The offending strings are for tests only.
     private void initializeOnClickListeners() {
-        // TODO: Make the following buttons transition to other activities
-
         Button searchForFriendsButton = (Button) findViewById(R.id.buttonSearchForFriends);
         searchForFriendsButton.setOnClickListener((view) -> {
             Log.i(DEFAULT_TAG, "Navigating to Search Page");
