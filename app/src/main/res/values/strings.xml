@@ -20,4 +20,6 @@
     <string name="permission_rationale">"Contacts permissions are needed for providing email
         completions."
     </string>
+    <string name="placeholder_for_search_menu">Placeholder for Search Menu</string>
+    <string name="search_button">Search</string>
 </resources>
