@@ -1,5 +1,8 @@
 package com.imminentapps.friendfinder.mocks;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * POJO to hold user information for mock database
  *
@@ -8,10 +11,12 @@ package com.imminentapps.friendfinder.mocks;
 public class User {
     private String email;
     private String password;
+    private List<User> friendsList;
 
     public User(String email, String password) {
         this.password = password;
         this.email = email;
+        this.friendsList = new ArrayList<>();
     }
 
     public String getPassword() {
@@ -30,6 +35,22 @@ public class User {
         this.email = email;
     }
 
+    public List<User> getFriendsList() {
+        return friendsList;
+    }
+
+    public boolean addFriend(User user) {
+        return friendsList.add(user);
+    }
+
+    public boolean isFriendsWith(User user) {
+        return friendsList.contains(user);
+    }
+
+    public boolean removeFriend(User user) {
+        return friendsList.remove(user);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -39,7 +60,6 @@ public class User {
 
         if (email != null ? !email.equals(user.email) : user.email != null) return false;
         return password != null ? password.equals(user.password) : user.password == null;
-
     }
 
     @Override
