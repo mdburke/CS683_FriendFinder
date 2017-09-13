@@ -41,6 +41,14 @@ public class User {
         this.email = email;
     }
 
+    public Profile getProfile() {
+        return profile;
+    }
+
+    public void setProfile(Profile profile) {
+        this.profile = profile;
+    }
+
     public List<User> getFriendsList() {
         return friendsList;
     }
@@ -56,6 +64,8 @@ public class User {
     public boolean removeFriend(User user) {
         return friendsList.remove(user);
     }
+
+
 
     @Override
     public boolean equals(Object o) {

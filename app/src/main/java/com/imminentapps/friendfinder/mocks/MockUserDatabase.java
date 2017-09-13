@@ -1,5 +1,6 @@
 package com.imminentapps.friendfinder.mocks;
 
+import com.imminentapps.friendfinder.domain.Profile;
 import com.imminentapps.friendfinder.domain.User;
 
 import java.util.HashMap;
@@ -31,9 +32,13 @@ public class MockUserDatabase {
     // Populates the list with fake data
     private void initializeMockDatabase() {
         users = new HashMap<>();
-        users.put("user1@test.com", new User("user1@test.com", "Password1"));
-        users.put("user2@test.com", new User("user2@test.com", "Password2"));
-        users.put("user3@test.com", new User("user3@test.com", "Password3"));
-        users.put("user4@test.com", new User("user4@test.com", "Password4"));
+        users.put("user1@test.com", new User(
+                "user1@test.com", "Password1", new Profile(null, "User1", "")));
+        users.put("user2@test.com", new User(
+                "user2@test.com", "Password2", new Profile(null, "User2", "")));
+        users.put("user3@test.com", new User(
+                "user3@test.com", "Password3", new Profile(null, "User3", "")));
+        users.put("user4@test.com", new User(
+                "user4@test.com", "Password4", new Profile(null, "User3", "")));
     }
 }

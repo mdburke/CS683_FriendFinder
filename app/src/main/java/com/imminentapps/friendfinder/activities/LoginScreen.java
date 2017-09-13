@@ -18,7 +18,6 @@ import android.widget.EditText;
 
 import com.imminentapps.friendfinder.R;
 import com.imminentapps.friendfinder.mocks.MockUserDatabase;
-import com.imminentapps.friendfinder.domain.User;
 
 /**
  * A login screen that offers login via email/password.
@@ -186,7 +185,7 @@ public class LoginScreen extends AppCompatActivity implements LoaderCallbacks<Cu
             }
 
             // Check to see if user is registered to the mock database
-            return userDatabase.getUsers().contains(new User(mEmail, mPassword));
+            return userDatabase.getUsers().containsKey(mEmail);
         }
 
         @Override

@@ -3,8 +3,6 @@ package com.imminentapps.friendfinder.activities;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -14,11 +12,15 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.imminentapps.friendfinder.R;
+import com.imminentapps.friendfinder.domain.User;
+import com.imminentapps.friendfinder.mocks.MockUserDatabase;
 
 public class HomeScreen extends AppCompatActivity {
+    private static final MockUserDatabase userDatabase = MockUserDatabase.getDatabase();
     private static final String DEFAULT_TAG = "DefaultTag";
     private TextView outputTextView;
     private TextView welcomeMessageTextView;
+    private User currentUser;
 
     //************* Lifecycle Methods ************//
 
@@ -35,11 +37,15 @@ public class HomeScreen extends AppCompatActivity {
 
         // Grab the email from the loginScreen
         Intent intent = getIntent();
-        CharSequence email = intent.getCharSequenceExtra("email");
-        Log.i("email", email.toString());
+
+        // Grab the user information from the database based on the email passed in
+        currentUser = userDatabase.getUsers().get(intent.getCharSequenceExtra("email").toString());
+        Log.i("email", currentUser.getEmail());
 
         // TODO: Figure out how to internationalize by using vars in strings.xml
-        welcomeMessageTextView.setText(getString(R.string.home_title) + " " + email.toString());
+        // Set welcome message to user name
+        welcomeMessageTextView.setText(getString(R.string.home_title) + " " +
+                currentUser.getProfile().getUsername());
 
         // Initialize on click listeners for buttons
         initializeOnClickListeners();
@@ -88,29 +94,27 @@ public class HomeScreen extends AppCompatActivity {
      */
     @SuppressLint("SetTextI18n")    // The offending strings are for tests only.
     private void initializeOnClickListeners() {
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener((view) -> Snackbar
-                .make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                .setAction("Action", null).show());
-
         // TODO: Make the following buttons transition to other activities
 
         Button searchForFriendsButton = (Button) findViewById(R.id.buttonSearchForFriends);
         searchForFriendsButton.setOnClickListener((view) -> {
-            Log.i(DEFAULT_TAG, "Go to SearchForFriends page here.");
-            outputTextView.setText("SearchForFriends last clicked.");
+            Log.i(DEFAULT_TAG, "Navigating to Search Page");
+            Intent intent = new Intent(this, SearchScreen.class);
+            startActivity(intent);
         });
 
         Button editProfileButton = (Button) findViewById(R.id.buttonEditProfile);
         editProfileButton.setOnClickListener((view) -> {
-            Log.i(DEFAULT_TAG, "Go to EditProfile page here.");
-            outputTextView.setText("EditProfile last clicked.");
+            Log.i(DEFAULT_TAG, "Navigating to Edit Profile page");
+            Intent intent = new Intent(this, EditProfileScreen.class);
+            startActivity(intent);
         });
 
         Button editAccountSettingsButton = (Button) findViewById(R.id.buttonEditAccountSettings);
         editAccountSettingsButton.setOnClickListener((view) -> {
-            Log.i(DEFAULT_TAG, "Go to EditAccountSettings page here.");
-            outputTextView.setText("EditAccountSettings last clicked.");
+            Log.i(DEFAULT_TAG, "Navigating to Edit Account Settings page");
+            Intent intent = new Intent(this, EditAccountSettingsScreen.class);
+            startActivity(intent);
         });
     }
 }

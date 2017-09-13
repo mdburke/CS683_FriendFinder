@@ -29,7 +29,8 @@
         </activity>
         <activity android:name=".activities.SearchScreen" />
         <activity android:name=".activities.ViewProfileScreen" />
-        <activity android:name=".activities.EditProfileScreen"></activity>
+        <activity android:name=".activities.EditProfileScreen" />
+        <activity android:name=".activities.EditAccountSettingsScreen"></activity>
     </application>
 
 </manifest>
