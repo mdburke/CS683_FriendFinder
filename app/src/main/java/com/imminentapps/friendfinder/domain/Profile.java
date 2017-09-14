@@ -1,5 +1,6 @@
 package com.imminentapps.friendfinder.domain;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,7 +10,7 @@ import java.util.List;
  * Created by mburke on 9/12/17.
  */
 
-public class Profile {
+public class Profile implements Serializable {
     private List<String> hobbies;
     private String username;
     private String aboutMeSection;
