@@ -17,6 +17,7 @@ import android.widget.Button;
 import android.widget.EditText;
 
 import com.imminentapps.friendfinder.R;
+import com.imminentapps.friendfinder.domain.User;
 import com.imminentapps.friendfinder.mocks.MockUserDatabase;
 
 /**
@@ -184,8 +185,9 @@ public class LoginScreen extends AppCompatActivity implements LoaderCallbacks<Cu
                 return false;
             }
 
-            // Check to see if user is registered to the mock database
-            return userDatabase.getUsers().containsKey(mEmail);
+            // Check to see if user is registered to the mock database and password matches
+            User user = userDatabase.getUsers().get(mEmail.toLowerCase());
+            return user != null && mPassword.equals(user.getPassword());
         }
 
         @Override
