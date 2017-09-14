@@ -24,9 +24,7 @@ import java.util.ArrayList;
  */
 public class SearchResultFragment extends Fragment {
 
-    // TODO: Customize parameter argument names
     private static final String ARG_COLUMN_COUNT = "column-count";
-    // TODO: Customize parameters
     private int mColumnCount = 1;
     private OnListFragmentInteractionListener mListener;
 
@@ -37,7 +35,6 @@ public class SearchResultFragment extends Fragment {
     public SearchResultFragment() {
     }
 
-    // TODO: Customize parameter initialization
     @SuppressWarnings("unused")
     public static SearchResultFragment newInstance(int columnCount) {
         SearchResultFragment fragment = new SearchResultFragment();
@@ -106,7 +103,6 @@ public class SearchResultFragment extends Fragment {
      * >Communicating with Other Fragments</a> for more information.
      */
     public interface OnListFragmentInteractionListener {
-        // TODO: Update argument type and name
         void onListFragmentInteraction(User user);
     }
 }

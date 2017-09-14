@@ -9,14 +9,12 @@ import android.widget.TextView;
 import com.imminentapps.friendfinder.R;
 import com.imminentapps.friendfinder.domain.User;
 import com.imminentapps.friendfinder.fragments.SearchResultFragment.OnListFragmentInteractionListener;
-import com.imminentapps.friendfinder.fragments.dummy.DummyContent.DummyItem;
 
 import java.util.List;
 
 /**
- * {@link RecyclerView.Adapter} that can display a {@link DummyItem} and makes a call to the
+ * {@link RecyclerView.Adapter} that can display a {@link User} and makes a call to the
  * specified {@link OnListFragmentInteractionListener}.
- * TODO: Replace the implementation with code for your data type.
  */
 public class UserSearchResultViewAdapter extends RecyclerView.Adapter<UserSearchResultViewAdapter.ViewHolder> {
 
@@ -41,14 +39,11 @@ public class UserSearchResultViewAdapter extends RecyclerView.Adapter<UserSearch
         holder.mIdView.setText(mValues.get(position).getEmail());
         holder.mContentView.setText(mValues.get(position).getProfile().getUsername());
 
-        holder.mView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (null != mListener) {
-                    // Notify the active callbacks interface (the activity, if the
-                    // fragment is attached to one) that an item has been selected.
-                    mListener.onListFragmentInteraction(holder.mItem);
-                }
+        holder.mView.setOnClickListener(v -> {
+            if (null != mListener) {
+                // Notify the active callbacks interface (the activity, if the
+                // fragment is attached to one) that an item has been selected.
+                mListener.onListFragmentInteraction(holder.mItem);
             }
         });
     }
@@ -67,8 +62,8 @@ public class UserSearchResultViewAdapter extends RecyclerView.Adapter<UserSearch
         public ViewHolder(View view) {
             super(view);
             mView = view;
-            mIdView = (TextView) view.findViewById(R.id.id);
-            mContentView = (TextView) view.findViewById(R.id.content);
+            mIdView = view.findViewById(R.id.id);
+            mContentView = view.findViewById(R.id.content);
         }
 
         @Override
