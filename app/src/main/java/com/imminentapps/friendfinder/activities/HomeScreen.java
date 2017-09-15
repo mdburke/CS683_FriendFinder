@@ -37,7 +37,8 @@ public class HomeScreen extends AppCompatActivity {
         Intent intent = getIntent();
 
         // Grab the user information from the database based on the email passed in
-        currentUser = userDatabase.getUsers().get(intent.getCharSequenceExtra("email").toString());
+        currentUser = userDatabase.getUsers().get(intent.getCharSequenceExtra("email").
+                toString().toLowerCase());
         Log.i("email", currentUser.getEmail());
 
         // TODO: Figure out how to internationalize by using vars in strings.xml

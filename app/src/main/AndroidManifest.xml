@@ -30,7 +30,8 @@
         <activity android:name=".activities.SearchScreen" />
         <activity android:name=".activities.ViewProfileScreen" />
         <activity android:name=".activities.EditProfileScreen" />
-        <activity android:name=".activities.EditAccountSettingsScreen"></activity>
+        <activity android:name=".activities.EditAccountSettingsScreen" />
+        <activity android:name=".activities.CreateAccountScreen"></activity>
     </application>
 
 </manifest>

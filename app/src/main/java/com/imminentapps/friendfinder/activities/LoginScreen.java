@@ -40,6 +40,7 @@ public class LoginScreen extends AppCompatActivity implements LoaderCallbacks<Cu
     private EditText mPasswordView;
     private View mProgressView;
     private View mLoginFormView;
+    private Button createAccountButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,6 +60,9 @@ public class LoginScreen extends AppCompatActivity implements LoaderCallbacks<Cu
 
         Button mEmailSignInButton = (Button) findViewById(R.id.email_sign_in_button);
         mEmailSignInButton.setOnClickListener(view -> attemptLogin());
+
+        createAccountButton = (Button) findViewById(R.id.create_account_button);
+        createAccountButton.setOnClickListener(view -> goToCreateAccountScreen());
 
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
@@ -151,12 +155,20 @@ public class LoginScreen extends AppCompatActivity implements LoaderCallbacks<Cu
     }
 
     /**
-     * Method that transitions to the HomeScreen Activity.
+     * Method that transitions to the HomeScreenActivity.
      * Passes the text from mEmailView along.
      */
     private void goToHomeScreen() {
         Intent intent = new Intent(this, HomeScreen.class);
         intent.putExtra("email", mEmailView.getText());
+        startActivity(intent);
+    }
+
+    /**
+     * Method that transitions to the CreateAccountScreen Activity.
+     */
+    private void goToCreateAccountScreen() {
+        Intent intent = new Intent(this, CreateAccountScreen.class);
         startActivity(intent);
     }
 
