@@ -31,6 +31,32 @@ public class MockUserDatabase {
 
     public Map<String, User> getUsers() { return users; }
 
+    public boolean containsEmail(String email) {
+        for (String user: users.keySet()) {
+            if (user.equalsIgnoreCase(email)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean containsUsername(String username) {
+        for (User user: users.values()) {
+            if (user.getProfile().getUsername().equalsIgnoreCase(username)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean addUser(User user) {
+        // Guard Clause;
+        if (containsEmail(user.getEmail())) { return false; }
+
+        users.put(user.getEmail(), user);
+        return true;
+    }
+
     // Populates the list with fake data
     private void initializeMockDatabase() {
         List<String> userOneHobbies = Arrays.asList("Soccer", "Golf", "Chess", "Reading");
