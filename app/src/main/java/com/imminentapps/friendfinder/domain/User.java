@@ -12,7 +12,7 @@ import java.util.List;
 public class User implements Serializable {
     private String email;
     private String password;
-    private List<User> friendsList;
+    private List<String> friendsList;
     private Profile profile;
 
     public User(String email, String password, Profile profile) {
@@ -50,20 +50,20 @@ public class User implements Serializable {
         this.profile = profile;
     }
 
-    public List<User> getFriendsList() {
+    public List<String> getFriendsList() {
         return friendsList;
     }
 
-    public boolean addFriend(User user) {
-        return friendsList.add(user);
+    public boolean addFriend(String email) {
+        return friendsList.add(email);
     }
 
-    public boolean isFriendsWith(User user) {
-        return friendsList.contains(user);
+    public boolean isFriendsWith(String email) {
+        return friendsList.contains(email);
     }
 
-    public boolean removeFriend(User user) {
-        return friendsList.remove(user);
+    public boolean removeFriend(String email) {
+        return friendsList.remove(email);
     }
 
 

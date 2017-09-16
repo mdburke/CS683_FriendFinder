@@ -2,8 +2,13 @@ package com.imminentapps.friendfinder.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.view.GestureDetectorCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.view.GestureDetector;
+import android.view.MotionEvent;
+import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -11,9 +16,13 @@ import com.imminentapps.friendfinder.R;
 import com.imminentapps.friendfinder.domain.Profile;
 import com.imminentapps.friendfinder.domain.User;
 
-public class ViewProfileScreen extends AppCompatActivity {
-    private User currentUser;
-    private Profile currentProfile;
+public class ViewProfileScreen extends AppCompatActivity implements GestureDetector.OnGestureListener {
+    private static final int SWIPE_MIN_DISTANCE = 120;
+    private User viewedUser;
+    private User loggedInUser;
+    private Profile viewedProfile;
+    private GestureDetectorCompat gestureDetectorCompat;
+    private ImageView friendIcon;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -23,21 +32,76 @@ public class ViewProfileScreen extends AppCompatActivity {
         Intent intent = getIntent();
 
         try {
-            currentUser = (User) intent.getSerializableExtra("user");
+            viewedUser = (User) intent.getSerializableExtra("viewedUser");
+            loggedInUser = (User) intent.getSerializableExtra("loggedInUser");
         } catch (ClassCastException e) {
             throw new IllegalStateException("Activity was not passed a valid user object.");
         }
 
-        currentProfile = currentUser.getProfile();
+        viewedProfile = viewedUser.getProfile();
 
         TextView usernameView = (TextView) findViewById(R.id.usernameTextView);
         ListView listView = (ListView) findViewById(R.id.hobbyListView);
         TextView aboutMeView = (TextView) findViewById(R.id.aboutMeTextView);
+        friendIcon = (ImageView) findViewById(R.id.friendIcon);
 
-        usernameView.setText(currentProfile.getUsername());
-        aboutMeView.setText(currentProfile.getAboutMeSection());
+        usernameView.setText(viewedProfile.getUsername());
+        aboutMeView.setText(viewedProfile.getAboutMeSection());
 
-        ArrayAdapter adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, currentProfile.getHobbies());
+        ArrayAdapter adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, viewedProfile.getHobbies());
         listView.setAdapter(adapter);
+
+        this.gestureDetectorCompat = new GestureDetectorCompat(this, this);
+
+        if (!loggedInUser.isFriendsWith(viewedUser.getEmail())) {
+            friendIcon.setVisibility(View.INVISIBLE);
+        }
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        this.gestureDetectorCompat.onTouchEvent(event);
+        return super.onTouchEvent(event);
+    }
+
+    //********** OnGestureListener methods ************//
+
+    @Override
+    public boolean onDown(MotionEvent motionEvent) {
+        return false;
+    }
+
+    @Override
+    public void onShowPress(MotionEvent motionEvent) {
+
+    }
+
+    @Override
+    public boolean onSingleTapUp(MotionEvent motionEvent) {
+        return false;
+    }
+
+    @Override
+    public boolean onScroll(MotionEvent motionEvent, MotionEvent motionEvent1, float v, float v1) {
+        return false;
+    }
+
+    @Override
+    public void onLongPress(MotionEvent motionEvent) {
+
+    }
+
+    @Override
+    public boolean onFling(MotionEvent event1, MotionEvent event2, float velocityX, float velocityY) {
+        // Code modified from: http://androidtuts4u.blogspot.com/2013/03/swipe-or-onfling-event-android.html
+        if (event2.getX() - event1.getX() > SWIPE_MIN_DISTANCE) {
+            loggedInUser.addFriend(viewedUser.getEmail());
+            friendIcon.setVisibility(View.VISIBLE);
+        } else if (event1.getX() - event2.getX() > SWIPE_MIN_DISTANCE) {
+            loggedInUser.removeFriend(viewedUser.getEmail());
+            friendIcon.setVisibility(View.INVISIBLE);
+        }
+
+        return true;
     }
 }

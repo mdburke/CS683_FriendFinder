@@ -93,6 +93,7 @@ public class HomeScreen extends AppCompatActivity {
         searchForFriendsButton.setOnClickListener((view) -> {
             Log.i(DEFAULT_TAG, "Navigating to Search Page");
             Intent intent = new Intent(this, SearchScreen.class);
+            intent.putExtra("loggedInUser", currentUser);
             startActivity(intent);
         });
 
@@ -100,6 +101,7 @@ public class HomeScreen extends AppCompatActivity {
         editProfileButton.setOnClickListener((view) -> {
             Log.i(DEFAULT_TAG, "Navigating to Edit Profile page");
             Intent intent = new Intent(this, EditProfileScreen.class);
+            intent.putExtra("loggedInUser", currentUser);
             startActivity(intent);
         });
 
@@ -107,6 +109,7 @@ public class HomeScreen extends AppCompatActivity {
         editAccountSettingsButton.setOnClickListener((view) -> {
             Log.i(DEFAULT_TAG, "Navigating to Edit Account Settings page");
             Intent intent = new Intent(this, EditAccountSettingsScreen.class);
+            intent.putExtra("loggedInUser", currentUser);
             startActivity(intent);
         });
     }

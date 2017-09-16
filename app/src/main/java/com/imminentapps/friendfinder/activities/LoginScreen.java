@@ -223,7 +223,7 @@ public class LoginScreen extends AppCompatActivity implements LoaderCallbacks<Cu
     }
 
 
-    //******** AppCompatActivity and LoaderCallbacks required methods *********//
+    //******** Required LoaderCallbacks methods *********//
 
     @Override
     public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {

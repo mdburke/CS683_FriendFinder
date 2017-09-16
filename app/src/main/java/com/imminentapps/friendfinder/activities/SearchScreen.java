@@ -15,18 +15,27 @@ public class SearchScreen extends AppCompatActivity implements
         SearchResultFragment.OnListFragmentInteractionListener {
     private static final MockUserDatabase userDatabase = MockUserDatabase.getDatabase();
     private ListView searchResultsView;
+    private User loggedInUser;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search_screen);
+
+        Intent intent = getIntent();
+        try {
+            loggedInUser = (User) intent.getSerializableExtra("loggedInUser");
+        } catch (ClassCastException e) {
+            throw new IllegalStateException("Activity was not passed a valid user object.");
+        }
     }
 
     @Override
     public void onListFragmentInteraction(User user) {
         Log.i("DefaultTag", "Navigating to View Profile page for user: " + user.getProfile().getUsername());
         Intent intent = new Intent(this, ViewProfileScreen.class);
-        intent.putExtra("user", user);
+        intent.putExtra("viewedUser", user);
+        intent.putExtra("loggedInUser", loggedInUser);
         startActivity(intent);
     }
 }
