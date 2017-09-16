@@ -17,7 +17,10 @@ import com.imminentapps.friendfinder.domain.Profile;
 import com.imminentapps.friendfinder.domain.User;
 
 public class ViewProfileScreen extends AppCompatActivity implements GestureDetector.OnGestureListener {
+    // Distance used to test for a valid swipe
     private static final int SWIPE_MIN_DISTANCE = 120;
+
+    // Instance vars
     private User viewedUser;
     private User loggedInUser;
     private Profile viewedProfile;
@@ -38,24 +41,25 @@ public class ViewProfileScreen extends AppCompatActivity implements GestureDetec
             throw new IllegalStateException("Activity was not passed a valid user object.");
         }
 
+        // Initialize vars/fields
         viewedProfile = viewedUser.getProfile();
-
         TextView usernameView = (TextView) findViewById(R.id.usernameTextView);
         ListView listView = (ListView) findViewById(R.id.hobbyListView);
         TextView aboutMeView = (TextView) findViewById(R.id.aboutMeTextView);
         friendIcon = (ImageView) findViewById(R.id.friendIcon);
 
+        // Setup the view based on the data
         usernameView.setText(viewedProfile.getUsername());
         aboutMeView.setText(viewedProfile.getAboutMeSection());
-
         ArrayAdapter adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, viewedProfile.getHobbies());
         listView.setAdapter(adapter);
-
-        this.gestureDetectorCompat = new GestureDetectorCompat(this, this);
 
         if (!loggedInUser.isFriendsWith(viewedUser.getEmail())) {
             friendIcon.setVisibility(View.INVISIBLE);
         }
+
+        // Initialize gesture detector
+        this.gestureDetectorCompat = new GestureDetectorCompat(this, this);
     }
 
     @Override
@@ -93,11 +97,15 @@ public class ViewProfileScreen extends AppCompatActivity implements GestureDetec
 
     @Override
     public boolean onFling(MotionEvent event1, MotionEvent event2, float velocityX, float velocityY) {
-        // Code modified from: http://androidtuts4u.blogspot.com/2013/03/swipe-or-onfling-event-android.html
+        // Detects if we have a valid right -> left swipe or left -> right swipe
+        // And updates the users friends based on that information.
+        // Logic taken from: http://androidtuts4u.blogspot.com/2013/03/swipe-or-onfling-event-android.html
         if (event2.getX() - event1.getX() > SWIPE_MIN_DISTANCE) {
+            // Detected left -> right swipe
             loggedInUser.addFriend(viewedUser.getEmail());
             friendIcon.setVisibility(View.VISIBLE);
         } else if (event1.getX() - event2.getX() > SWIPE_MIN_DISTANCE) {
+            // Detected right -> left swipe
             loggedInUser.removeFriend(viewedUser.getEmail());
             friendIcon.setVisibility(View.INVISIBLE);
         }

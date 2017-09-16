@@ -1,6 +1,5 @@
 package com.imminentapps.friendfinder.activities;
 
-import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -30,15 +29,17 @@ public class HomeScreen extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        // Initialize the outputTextView and welcomeMessageTextView fields
+        // Initialize the welcomeMessageTextView field
         welcomeMessageTextView = (TextView) findViewById(R.id.textView);
 
-        // Grab the email from the loginScreen
-        Intent intent = getIntent();
-
         // Grab the user information from the database based on the email passed in
-        currentUser = userDatabase.getUsers().get(intent.getCharSequenceExtra("email").
-                toString().toLowerCase());
+        Intent intent = getIntent();
+        currentUser = userDatabase.getUsers().get(intent.getCharSequenceExtra("email").toString());
+        if (currentUser == null) {
+            throw new IllegalStateException("HomeScreen was not able to locate" +
+                "the logged in user.");
+        }
+
         Log.i("email", currentUser.getEmail());
 
         // TODO: Figure out how to internationalize by using vars in strings.xml
@@ -87,8 +88,8 @@ public class HomeScreen extends AppCompatActivity {
     /**
      * Helper method that initializes the screen's buttons to have onClickListeners.
      */
-    @SuppressLint("SetTextI18n")    // The offending strings are for tests only.
     private void initializeOnClickListeners() {
+        // Initialize Search For Friends button
         Button searchForFriendsButton = (Button) findViewById(R.id.buttonSearchForFriends);
         searchForFriendsButton.setOnClickListener((view) -> {
             Log.i(DEFAULT_TAG, "Navigating to Search Page");
@@ -97,6 +98,7 @@ public class HomeScreen extends AppCompatActivity {
             startActivity(intent);
         });
 
+        // Initialize Edit Profile button
         Button editProfileButton = (Button) findViewById(R.id.buttonEditProfile);
         editProfileButton.setOnClickListener((view) -> {
             Log.i(DEFAULT_TAG, "Navigating to Edit Profile page");
@@ -105,6 +107,7 @@ public class HomeScreen extends AppCompatActivity {
             startActivity(intent);
         });
 
+        // Initialize Edit Account Settings button
         Button editAccountSettingsButton = (Button) findViewById(R.id.buttonEditAccountSettings);
         editAccountSettingsButton.setOnClickListener((view) -> {
             Log.i(DEFAULT_TAG, "Navigating to Edit Account Settings page");

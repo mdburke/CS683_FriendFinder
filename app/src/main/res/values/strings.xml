@@ -30,4 +30,10 @@
     <string name="password">Password:</string>
     <string name="username">Username:</string>
     <string name="create_account_button">Create Account</string>
+    <string name="about_me">About Me</string>
+    <string name="aboutmeview">AboutMeView</string>
+    <string name="hobbies">Hobbies</string>
+    <string name="usernameProfileScreen">UserName</string>
+    <string name="user_profile_image">User Profile Image</string>
+    <string name="friend_star">Friend Star</string>
 </resources>

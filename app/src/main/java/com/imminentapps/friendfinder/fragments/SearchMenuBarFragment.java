@@ -12,7 +12,6 @@ import com.imminentapps.friendfinder.R;
 /**
  * Created by mburke on 9/13/17.
  */
-
 public class SearchMenuBarFragment extends Fragment {
 
     @Nullable

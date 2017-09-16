@@ -11,6 +11,9 @@ import com.imminentapps.friendfinder.domain.Profile;
 import com.imminentapps.friendfinder.domain.User;
 import com.imminentapps.friendfinder.mocks.MockUserDatabase;
 
+/**
+ * Activity for new user to create account
+ */
 public class CreateAccountScreen extends AppCompatActivity {
     private static final MockUserDatabase userDatabase = MockUserDatabase.getDatabase();
 
@@ -39,20 +42,33 @@ public class CreateAccountScreen extends AppCompatActivity {
         createAccountButton.setOnClickListener((view -> createAccountAndNavigateHome()));
     }
 
+    /**
+     * Validates the email, password and username. If these are valid,
+     * this creates the new user, adds it to the mock DB, and navigates to the home screen.
+     */
     private void createAccountAndNavigateHome() {
         // Guard Clause
         if (!validateEmail() || !validatePassword() || !validateUsername()) { return; }
 
+        // Create the new user with the given information
         User newUser = new User(emailView.getText().toString(), passwordView.getText().toString(),
                 new Profile(null, usernameView.getText().toString(), null));
 
+        // Add the user to the MockDB
         userDatabase.addUser(newUser);
 
+        // Navigate to the HomeScreen as if the user has just logged in
         Intent intent = new Intent(this, HomeScreen.class);
         intent.putExtra("email", emailView.getText());
         startActivity(intent);
     }
 
+    /**
+     * Method checks if email has an '@' symbol and also checks if the email is already
+     * in the database.
+     * @return - true if email is valid
+     * TODO: add a more advanced regex check for a valid email.
+     */
     private boolean validateEmail() {
         String email = emailView.getText().toString();
         if (!email.contains("@") || userDatabase.containsEmail(email)) {
@@ -63,6 +79,11 @@ public class CreateAccountScreen extends AppCompatActivity {
         return true;
     }
 
+    /**
+     * Method ensures password is 5 chars long.
+     * @return - true if password is valid
+     * TODO: add a more advanced regex check for a valid password with more requirements.
+     */
     private boolean validatePassword() {
         if (passwordView.getText().length() < 5) {
             passwordView.setError("Invalid password!");
@@ -72,6 +93,10 @@ public class CreateAccountScreen extends AppCompatActivity {
         return true;
     }
 
+    /**
+     * Method ensures username is at least 5 chars long and is not already in the database.
+     * @return - true if username is valid
+     */
     private boolean validateUsername() {
         String username = usernameView.getText().toString();
         if (username.length() < 5 || userDatabase.containsUsername(username)) {

@@ -119,12 +119,10 @@ public class LoginScreen extends AppCompatActivity implements LoaderCallbacks<Cu
     }
 
     private boolean isEmailValid(String email) {
-        //TODO: Replace this with your own logic
         return email.contains("@");
     }
 
     private boolean isPasswordValid(String password) {
-        //TODO: Replace this with your own logic
         return password.length() > 4;
     }
 
@@ -198,7 +196,7 @@ public class LoginScreen extends AppCompatActivity implements LoaderCallbacks<Cu
             }
 
             // Check to see if user is registered to the mock database and password matches
-            User user = userDatabase.getUsers().get(mEmail.toLowerCase());
+            User user = userDatabase.getUsers().get(mEmail);
             return user != null && mPassword.equals(user.getPassword());
         }
 
