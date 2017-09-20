@@ -1,7 +1,10 @@
 package com.imminentapps.friendfinder.activities;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.v4.view.GestureDetectorCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.GestureDetector;
@@ -16,6 +19,8 @@ import com.imminentapps.friendfinder.R;
 import com.imminentapps.friendfinder.domain.Profile;
 import com.imminentapps.friendfinder.domain.User;
 
+import java.io.IOException;
+
 public class ViewProfileScreen extends AppCompatActivity implements GestureDetector.OnGestureListener {
     // Distance used to test for a valid swipe
     private static final int SWIPE_MIN_DISTANCE = 120;
@@ -26,6 +31,7 @@ public class ViewProfileScreen extends AppCompatActivity implements GestureDetec
     private Profile viewedProfile;
     private GestureDetectorCompat gestureDetectorCompat;
     private ImageView friendIcon;
+    private ImageView profileImageView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,6 +52,7 @@ public class ViewProfileScreen extends AppCompatActivity implements GestureDetec
         TextView usernameView = (TextView) findViewById(R.id.usernameTextView);
         ListView listView = (ListView) findViewById(R.id.hobbyListView);
         TextView aboutMeView = (TextView) findViewById(R.id.aboutMeTextView);
+        profileImageView = (ImageView) findViewById(R.id.profileImageView);
         friendIcon = (ImageView) findViewById(R.id.friendIcon);
 
         // Setup the view based on the data
@@ -53,6 +60,7 @@ public class ViewProfileScreen extends AppCompatActivity implements GestureDetec
         aboutMeView.setText(viewedProfile.getAboutMeSection());
         ArrayAdapter adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, viewedProfile.getHobbies());
         listView.setAdapter(adapter);
+        setupProfileImage();
 
         if (!loggedInUser.isFriendsWith(viewedUser.getEmail())) {
             friendIcon.setVisibility(View.INVISIBLE);
@@ -60,6 +68,22 @@ public class ViewProfileScreen extends AppCompatActivity implements GestureDetec
 
         // Initialize gesture detector
         this.gestureDetectorCompat = new GestureDetectorCompat(this, this);
+    }
+
+    private void setupProfileImage() {
+        if (viewedProfile.getProfileImageUri() != null) {
+            Bitmap bitmap = null;
+            Uri uri = Uri.parse(viewedProfile.getProfileImageUri());
+
+            try {
+                bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), uri);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            if (bitmap != null) {
+                profileImageView.setImageBitmap(bitmap);
+            }
+        }
     }
 
     @Override

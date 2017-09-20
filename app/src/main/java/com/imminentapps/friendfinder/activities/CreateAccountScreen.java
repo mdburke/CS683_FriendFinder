@@ -3,6 +3,8 @@ package com.imminentapps.friendfinder.activities;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
+import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -24,6 +26,7 @@ public class CreateAccountScreen extends AppCompatActivity {
     private TextView firstNameView;
     private TextView lastNameView;
     private Button createAccountButton;
+    private String profileImageUri;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,7 +55,12 @@ public class CreateAccountScreen extends AppCompatActivity {
 
         // Create the new user with the given information
         User newUser = new User(emailView.getText().toString(), passwordView.getText().toString(),
-                new Profile(null, usernameView.getText().toString(), null));
+                new Profile(null,
+                        usernameView.getText().toString(),
+                        null,
+                        firstNameView.getText().toString(),
+                        lastNameView.getText().toString(),
+                        profileImageUri));
 
         // Add the user to the MockDB
         userDatabase.addUser(newUser);
@@ -105,5 +113,21 @@ public class CreateAccountScreen extends AppCompatActivity {
             return false;
         }
         return true;
+    }
+
+    public void selectProfileImage(View view) {
+        Intent photoPickerIntent = new Intent(Intent.ACTION_GET_CONTENT);
+        photoPickerIntent.setType("image/*");
+        startActivityForResult(photoPickerIntent, 1);
+    }
+
+    // https://stackoverflow.com/questions/2227209/how-to-get-the-images-from-device-in-android-java-application
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == RESULT_OK) {
+            profileImageUri = data.getData().toString();
+
+            Log.i("image", profileImageUri);
+        }
     }
 }
