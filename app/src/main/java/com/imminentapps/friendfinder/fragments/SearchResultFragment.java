@@ -11,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.imminentapps.friendfinder.R;
+import com.imminentapps.friendfinder.adapters.UserSearchResultViewAdapter;
 import com.imminentapps.friendfinder.domain.User;
 import com.imminentapps.friendfinder.mocks.MockUserDatabase;
 

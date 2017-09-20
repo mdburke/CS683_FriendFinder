@@ -12,12 +12,14 @@ import com.imminentapps.friendfinder.R;
 import com.imminentapps.friendfinder.domain.Profile;
 import com.imminentapps.friendfinder.domain.User;
 import com.imminentapps.friendfinder.mocks.MockUserDatabase;
+import com.imminentapps.friendfinder.utils.DBUtil;
 
 /**
  * Activity for new user to create account
  */
 public class CreateAccountScreen extends AppCompatActivity {
     private static final MockUserDatabase userDatabase = MockUserDatabase.getDatabase();
+    private DBUtil dbUtil = new DBUtil(getApplicationContext());
 
     // Views
     private TextView usernameView;
@@ -63,7 +65,7 @@ public class CreateAccountScreen extends AppCompatActivity {
                         profileImageUri));
 
         // Add the user to the MockDB
-        userDatabase.addUser(newUser);
+        dbUtil.addUser(newUser);
 
         // Navigate to the HomeScreen as if the user has just logged in
         Intent intent = new Intent(this, HomeScreen.class);

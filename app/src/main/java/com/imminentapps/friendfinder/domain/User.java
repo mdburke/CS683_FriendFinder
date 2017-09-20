@@ -14,16 +14,25 @@ public class User implements Serializable {
     private String password;
     private List<String> friendsList;
     private Profile profile;
+    private String userId;
 
-    public User(String email, String password, Profile profile) {
+    public User(String email, String password, Profile profile, String userId) {
         this.password = password;
         this.email = email;
         this.profile = (profile != null) ? profile : new Profile();
         this.friendsList = new ArrayList<>();
+        this.userId = userId;
     }
 
-    public User(String email, String password) {
-        this(email, password, null);
+    public User(String email, String password, String userId) {
+        this(email, password, null, userId);
+    }
+
+    public User(String email, String password, Profile profile) {
+        this.email = email;
+        this.password = password;
+        this.profile = (profile != null) ? profile : new Profile();
+        this.friendsList = new ArrayList<>();
     }
 
     public String getPassword() {
@@ -52,6 +61,14 @@ public class User implements Serializable {
 
     public List<String> getFriendsList() {
         return friendsList;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
     public boolean addFriend(String email) {

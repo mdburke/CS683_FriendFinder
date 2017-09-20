@@ -1,4 +1,4 @@
-package com.imminentapps.friendfinder.fragments;
+package com.imminentapps.friendfinder.adapters;
 
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
