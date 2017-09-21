@@ -13,7 +13,7 @@ import android.view.ViewGroup;
 import com.imminentapps.friendfinder.R;
 import com.imminentapps.friendfinder.adapters.UserSearchResultViewAdapter;
 import com.imminentapps.friendfinder.domain.User;
-import com.imminentapps.friendfinder.mocks.MockUserDatabase;
+import com.imminentapps.friendfinder.utils.DBUtil;
 
 import java.util.ArrayList;
 
@@ -24,7 +24,7 @@ import java.util.ArrayList;
  * interface.
  */
 public class SearchResultFragment extends Fragment {
-
+    private DBUtil dbUtil;
     private static final String ARG_COLUMN_COUNT = "column-count";
     private int mColumnCount = 1;
     private OnListFragmentInteractionListener mListener;
@@ -48,6 +48,7 @@ public class SearchResultFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        dbUtil = new DBUtil(getContext());
 
         if (getArguments() != null) {
             mColumnCount = getArguments().getInt(ARG_COLUMN_COUNT);
@@ -69,7 +70,7 @@ public class SearchResultFragment extends Fragment {
                 recyclerView.setLayoutManager(new GridLayoutManager(context, mColumnCount));
             }
             ArrayList<User> list = new ArrayList<>();
-            list.addAll(MockUserDatabase.getDatabase().getUsers().values());
+            list.addAll(dbUtil.getAllUsers());
             recyclerView.setAdapter(new UserSearchResultViewAdapter(list, mListener));
         }
         return view;

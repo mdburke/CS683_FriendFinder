@@ -16,16 +16,16 @@ public class Profile implements Serializable {
     private String aboutMeSection;
     private String firstName;
     private String lastName;
-    private String profileImageUri;
+    private byte[] profileImage;
 
     public Profile(List<String> hobbies, String username, String aboutMeSection,
-                   String firstName, String lastName, String profileImageUri) {
+                   String firstName, String lastName, byte[] profileImage) {
         this.hobbies = (hobbies != null) ? hobbies : new ArrayList<>();
         this.username = username;
         this.aboutMeSection = aboutMeSection;
         this.firstName = firstName;
         this.lastName = lastName;
-        this.profileImageUri = profileImageUri;
+        this.profileImage = profileImage;
     }
 
     public Profile(List<String> hobbies, String username, String aboutMeSection) {
@@ -76,12 +76,12 @@ public class Profile implements Serializable {
         this.lastName = lastName;
     }
 
-    public String getProfileImageUri() {
-        return profileImageUri;
+    public byte[] getProfileImage() {
+        return profileImage;
     }
 
-    public void setProfileImageUri(String profileImage) {
-        this.profileImageUri = profileImage;
+    public void setProfileImage(byte[] profileImage) {
+        this.profileImage = profileImage;
     }
 
     @Override

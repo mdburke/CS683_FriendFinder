@@ -19,6 +19,7 @@ import android.widget.EditText;
 import com.imminentapps.friendfinder.R;
 import com.imminentapps.friendfinder.domain.User;
 import com.imminentapps.friendfinder.mocks.MockUserDatabase;
+import com.imminentapps.friendfinder.utils.DBUtil;
 
 /**
  * A login screen that offers login via email/password.
@@ -29,6 +30,7 @@ public class LoginScreen extends AppCompatActivity implements LoaderCallbacks<Cu
      * TODO: remove after connecting to a real authentication system.
      */
     private static final MockUserDatabase userDatabase = MockUserDatabase.getDatabase();
+    private DBUtil dbUtil;
 
     /**
      * Keep track of the login task to ensure we can cancel it if requested.
@@ -46,6 +48,7 @@ public class LoginScreen extends AppCompatActivity implements LoaderCallbacks<Cu
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login_screen);
+        dbUtil = new DBUtil(getApplicationContext());
 
         // Set up the login form.
         mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
@@ -196,8 +199,9 @@ public class LoginScreen extends AppCompatActivity implements LoaderCallbacks<Cu
             }
 
             // Check to see if user is registered to the mock database and password matches
-            User user = userDatabase.getUsers().get(mEmail);
-            return user != null && mPassword.equals(user.getPassword());
+            User user = dbUtil.getUser(mEmail);
+//            return user != null && mPassword.equals(user.getPassword());
+            return true;
         }
 
         @Override

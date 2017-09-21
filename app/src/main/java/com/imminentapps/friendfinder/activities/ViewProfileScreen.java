@@ -2,9 +2,8 @@ package com.imminentapps.friendfinder.activities;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.net.Uri;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.support.v4.view.GestureDetectorCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.GestureDetector;
@@ -18,10 +17,13 @@ import android.widget.TextView;
 import com.imminentapps.friendfinder.R;
 import com.imminentapps.friendfinder.domain.Profile;
 import com.imminentapps.friendfinder.domain.User;
+import com.imminentapps.friendfinder.utils.DBUtil;
 
-import java.io.IOException;
+import java.io.ByteArrayInputStream;
 
 public class ViewProfileScreen extends AppCompatActivity implements GestureDetector.OnGestureListener {
+    private DBUtil dbUtil;
+
     // Distance used to test for a valid swipe
     private static final int SWIPE_MIN_DISTANCE = 120;
 
@@ -37,12 +39,13 @@ public class ViewProfileScreen extends AppCompatActivity implements GestureDetec
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_view_profile_screen);
+        dbUtil = new DBUtil(getApplicationContext());
 
         Intent intent = getIntent();
 
         try {
-            viewedUser = (User) intent.getSerializableExtra("viewedUser");
-            loggedInUser = (User) intent.getSerializableExtra("loggedInUser");
+            viewedUser = dbUtil.getUser(intent.getCharSequenceExtra("viewedUser").toString());
+            loggedInUser = dbUtil.getUser(intent.getSerializableExtra("email").toString());
         } catch (ClassCastException e) {
             throw new IllegalStateException("Activity was not passed a valid user object.");
         }
@@ -71,18 +74,11 @@ public class ViewProfileScreen extends AppCompatActivity implements GestureDetec
     }
 
     private void setupProfileImage() {
-        if (viewedProfile.getProfileImageUri() != null) {
-            Bitmap bitmap = null;
-            Uri uri = Uri.parse(viewedProfile.getProfileImageUri());
-
-            try {
-                bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), uri);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            if (bitmap != null) {
-                profileImageView.setImageBitmap(bitmap);
-            }
+        byte[] profileImage = viewedProfile.getProfileImage();
+        if (profileImage != null) {
+            ByteArrayInputStream inputStream = new ByteArrayInputStream(profileImage);
+            Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
+            profileImageView.setImageBitmap(bitmap);
         }
     }
 

@@ -12,11 +12,11 @@ import android.widget.TextView;
 
 import com.imminentapps.friendfinder.R;
 import com.imminentapps.friendfinder.domain.User;
-import com.imminentapps.friendfinder.mocks.MockUserDatabase;
+import com.imminentapps.friendfinder.utils.DBUtil;
 
 public class HomeScreen extends AppCompatActivity {
-    private static final MockUserDatabase userDatabase = MockUserDatabase.getDatabase();
     private static final String DEFAULT_TAG = "DefaultTag";
+    private DBUtil dbUtil;
     private TextView welcomeMessageTextView;
     private User currentUser;
 
@@ -28,16 +28,17 @@ public class HomeScreen extends AppCompatActivity {
         setContentView(R.layout.activity_home_screen);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        dbUtil = new DBUtil(getApplicationContext());
 
         // Initialize the welcomeMessageTextView field
         welcomeMessageTextView = (TextView) findViewById(R.id.textView);
 
         // Grab the user information from the database based on the email passed in
         Intent intent = getIntent();
-        currentUser = userDatabase.getUsers().get(intent.getCharSequenceExtra("email").toString());
+        currentUser = dbUtil.getUser(intent.getCharSequenceExtra("email").toString());
         if (currentUser == null) {
             throw new IllegalStateException("HomeScreen was not able to locate" +
-                "the logged in user.");
+                " the logged in user.");
         }
 
         Log.i("email", currentUser.getEmail());
@@ -94,7 +95,7 @@ public class HomeScreen extends AppCompatActivity {
         searchForFriendsButton.setOnClickListener((view) -> {
             Log.i(DEFAULT_TAG, "Navigating to Search Page");
             Intent intent = new Intent(this, SearchScreen.class);
-            intent.putExtra("loggedInUser", currentUser);
+            intent.putExtra("email", currentUser.getEmail());
             startActivity(intent);
         });
 
@@ -103,7 +104,7 @@ public class HomeScreen extends AppCompatActivity {
         editProfileButton.setOnClickListener((view) -> {
             Log.i(DEFAULT_TAG, "Navigating to Edit Profile page");
             Intent intent = new Intent(this, EditProfileScreen.class);
-            intent.putExtra("loggedInUser", currentUser);
+            intent.putExtra("email", currentUser.getEmail());
             startActivity(intent);
         });
 
@@ -112,7 +113,7 @@ public class HomeScreen extends AppCompatActivity {
         editAccountSettingsButton.setOnClickListener((view) -> {
             Log.i(DEFAULT_TAG, "Navigating to Edit Account Settings page");
             Intent intent = new Intent(this, EditAccountSettingsScreen.class);
-            intent.putExtra("loggedInUser", currentUser);
+            intent.putExtra("email", currentUser.getEmail());
             startActivity(intent);
         });
     }

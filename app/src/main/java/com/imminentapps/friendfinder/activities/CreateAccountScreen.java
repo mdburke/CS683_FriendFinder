@@ -1,9 +1,12 @@
 package com.imminentapps.friendfinder.activities;
 
 import android.content.Intent;
+import android.database.sqlite.SQLiteConstraintException;
+import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -14,12 +17,15 @@ import com.imminentapps.friendfinder.domain.User;
 import com.imminentapps.friendfinder.mocks.MockUserDatabase;
 import com.imminentapps.friendfinder.utils.DBUtil;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+
 /**
  * Activity for new user to create account
  */
 public class CreateAccountScreen extends AppCompatActivity {
     private static final MockUserDatabase userDatabase = MockUserDatabase.getDatabase();
-    private DBUtil dbUtil = new DBUtil(getApplicationContext());
+    private DBUtil dbUtil;
 
     // Views
     private TextView usernameView;
@@ -28,12 +34,13 @@ public class CreateAccountScreen extends AppCompatActivity {
     private TextView firstNameView;
     private TextView lastNameView;
     private Button createAccountButton;
-    private String profileImageUri;
+    private Bitmap profileImage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_account);
+        dbUtil = new DBUtil(getApplicationContext());
 
         // Initialize subviews
         usernameView = (TextView) findViewById(R.id.enterUsernameField);
@@ -56,16 +63,24 @@ public class CreateAccountScreen extends AppCompatActivity {
         if (!validateEmail() || !validatePassword() || !validateUsername()) { return; }
 
         // Create the new user with the given information
-        User newUser = new User(emailView.getText().toString(), passwordView.getText().toString(),
+        User newUser = new User(
+                emailView.getText().toString(),
+                passwordView.getText().toString(),
                 new Profile(null,
                         usernameView.getText().toString(),
                         null,
                         firstNameView.getText().toString(),
                         lastNameView.getText().toString(),
-                        profileImageUri));
+                        compressImage(profileImage)));
 
         // Add the user to the MockDB
-        dbUtil.addUser(newUser);
+        try {
+            dbUtil.addUser(newUser);
+        } catch (SQLiteConstraintException e) {
+            emailView.setError("Invalid email address!");
+            emailView.requestFocus();
+            return;
+        }
 
         // Navigate to the HomeScreen as if the user has just logged in
         Intent intent = new Intent(this, HomeScreen.class);
@@ -127,9 +142,23 @@ public class CreateAccountScreen extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == RESULT_OK) {
-            profileImageUri = data.getData().toString();
+            Uri uri = data.getData();
 
-            Log.i("image", profileImageUri);
+            try {
+                profileImage = MediaStore.Images.Media.getBitmap(this.getContentResolver(), uri);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
+    }
+
+    // https://acadgild.com/blog/save-retrieve-image-sqlite-android/
+    private byte[] compressImage(Bitmap image) {
+        if (image != null) {
+            ByteArrayOutputStream stream = new ByteArrayOutputStream();
+            image.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+            return stream.toByteArray();
+        }
+        return null;
     }
 }
