@@ -11,6 +11,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.imminentapps.friendfinder.R;
+import com.imminentapps.friendfinder.database.AppDatabase;
 import com.imminentapps.friendfinder.domain.User;
 import com.imminentapps.friendfinder.mocks.MockUserDatabase;
 
@@ -21,6 +22,12 @@ public class HomeScreen extends AppCompatActivity {
     private User currentUser;
 
     //************* Lifecycle Methods ************//
+
+    @Override
+    protected void onDestroy() {
+        AppDatabase.destroyInstance();
+        super.onDestroy();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

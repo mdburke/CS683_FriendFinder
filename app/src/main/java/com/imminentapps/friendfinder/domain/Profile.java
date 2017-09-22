@@ -1,5 +1,10 @@
 package com.imminentapps.friendfinder.domain;
 
+import android.arch.persistence.room.ColumnInfo;
+import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.PrimaryKey;
+import android.arch.persistence.room.Relation;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -9,14 +14,30 @@ import java.util.List;
  *
  * Created by mburke on 9/12/17.
  */
-
+@Entity
 public class Profile implements Serializable {
-    private List<String> hobbies;
     private String username;
+
+    @ColumnInfo(name = "about_me_section")
     private String aboutMeSection;
+
+    @ColumnInfo(name = "first_name")
     private String firstName;
+
+    @ColumnInfo(name = "last_name")
     private String lastName;
+
+    @ColumnInfo(name = "profile_image_uri")
     private String profileImageUri;
+
+    @ColumnInfo(name = "user_id")
+    private int userId;
+
+    @Relation(parentColumn = "id", entityColumn = "profile_id")
+    private List<String> hobbies;
+
+    @PrimaryKey(autoGenerate = true)
+    private int id;
 
     public Profile(List<String> hobbies, String username, String aboutMeSection,
                    String firstName, String lastName, String profileImageUri) {
@@ -82,6 +103,22 @@ public class Profile implements Serializable {
 
     public void setProfileImageUri(String profileImage) {
         this.profileImageUri = profileImage;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public int getUserId() {
+        return userId;
+    }
+
+    public void setUserId(int userId) {
+        this.userId = userId;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     @Override
