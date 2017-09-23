@@ -11,6 +11,7 @@
     tools:context="com.imminentapps.friendfinder.activities.LoginScreen">
 
     <!-- Login progress -->
+
     <ProgressBar
         android:id="@+id/login_progress"
         style="?android:attr/progressBarStyleLarge"
@@ -60,6 +61,12 @@
                     android:maxLines="1" />
 
             </android.support.design.widget.TextInputLayout>
+
+            <CheckBox
+                android:id="@+id/stayLoggedInCheckbox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/stay_logged_in_for_1_day" />
 
             <Button
                 android:id="@+id/email_sign_in_button"

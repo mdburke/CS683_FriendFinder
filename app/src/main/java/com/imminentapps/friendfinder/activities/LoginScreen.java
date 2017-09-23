@@ -5,6 +5,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.app.LoaderManager.LoaderCallbacks;
 import android.content.Intent;
 import android.content.Loader;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -14,12 +15,16 @@ import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 
 import com.imminentapps.friendfinder.R;
 import com.imminentapps.friendfinder.database.AppDatabase;
 import com.imminentapps.friendfinder.database.DBUtil;
 import com.imminentapps.friendfinder.domain.User;
+
+import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 /**
  * A login screen that offers login via email/password.
@@ -42,12 +47,15 @@ public class LoginScreen extends AppCompatActivity implements LoaderCallbacks<Cu
     private View mProgressView;
     private View mLoginFormView;
     private Button createAccountButton;
+    private CheckBox stayLoggedInCheckBox;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login_screen);
         db = DBUtil.getDBInstance();
+
+        checkLoggedInFlag();
 
         // Set up the login form.
         mEmailView = findViewById(R.id.email);
@@ -68,6 +76,34 @@ public class LoginScreen extends AppCompatActivity implements LoaderCallbacks<Cu
 
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
+        stayLoggedInCheckBox = findViewById(R.id.stayLoggedInCheckbox);
+    }
+
+    // TODO: Cleanup logic
+    private void checkLoggedInFlag() {
+        SharedPreferences preferences = getPreferences(MODE_PRIVATE);
+        boolean stayLoggedIn = preferences.getBoolean("stayLoggedIn", false);
+        long expiration;
+
+        // Check if the stayLoggedIn flag is set
+        if (!stayLoggedIn) {
+            return;
+        } else {
+            // If it is, get the expiration date
+            expiration = preferences.getLong("expiration", 0L);
+        }
+
+        // Check if it has expired. If so, return to login screen. If not, proceed to HomeScreen
+        if (System.currentTimeMillis() > expiration) {
+            return;
+        } else {
+            Intent intent = new Intent(this, HomeScreen.class);
+            intent.putExtra("email", preferences.getString("email", null));
+
+            if (intent.getCharSequenceExtra("email") == null) { return; }
+            startActivity(intent);
+        }
+
     }
 
     /**
@@ -159,6 +195,20 @@ public class LoginScreen extends AppCompatActivity implements LoaderCallbacks<Cu
      * Passes the text from mEmailView along.
      */
     private void goToHomeScreen() {
+        // Set flags
+        if (stayLoggedInCheckBox.isChecked()) {
+            SharedPreferences preferences = getPreferences(MODE_PRIVATE);
+            SharedPreferences.Editor editor = preferences.edit();
+            editor.putBoolean("stayLoggedIn", true);
+
+            Date expiration = new Date(System.currentTimeMillis() + TimeUnit.DAYS.toMillis(1));
+            editor.putLong("expiration", expiration.getTime());
+
+            editor.putString("email", mEmailView.getText().toString());
+
+            editor.apply();
+        }
+
         Intent intent = new Intent(this, HomeScreen.class);
         intent.putExtra("email", mEmailView.getText());
         startActivity(intent);
