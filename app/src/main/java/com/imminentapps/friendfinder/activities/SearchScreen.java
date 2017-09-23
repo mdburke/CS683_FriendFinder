@@ -9,11 +9,9 @@ import android.widget.ListView;
 import com.imminentapps.friendfinder.R;
 import com.imminentapps.friendfinder.domain.User;
 import com.imminentapps.friendfinder.fragments.SearchResultFragment;
-import com.imminentapps.friendfinder.mocks.MockUserDatabase;
 
 public class SearchScreen extends AppCompatActivity implements
         SearchResultFragment.OnListFragmentInteractionListener {
-    private static final MockUserDatabase userDatabase = MockUserDatabase.getDatabase();
     private ListView searchResultsView;
     private User loggedInUser;
 
