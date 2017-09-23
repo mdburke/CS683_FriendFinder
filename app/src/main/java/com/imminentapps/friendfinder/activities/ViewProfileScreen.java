@@ -2,9 +2,8 @@ package com.imminentapps.friendfinder.activities;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.net.Uri;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.support.v4.view.GestureDetectorCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -20,6 +19,7 @@ import com.imminentapps.friendfinder.R;
 import com.imminentapps.friendfinder.domain.Profile;
 import com.imminentapps.friendfinder.domain.User;
 
+import java.io.FileInputStream;
 import java.util.ArrayList;
 
 public class ViewProfileScreen extends AppCompatActivity implements GestureDetector.OnGestureListener {
@@ -80,12 +80,16 @@ public class ViewProfileScreen extends AppCompatActivity implements GestureDetec
     private void setupProfileImage() {
         if (viewedProfile.getProfileImageUri() != null) {
             Bitmap bitmap = null;
-            Uri uri = Uri.parse(viewedProfile.getProfileImageUri());
+            String uri = viewedProfile.getProfileImageUri();
+            FileInputStream inputStream;
 
             try {
-                bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), uri);
+                inputStream = openFileInput(uri);
+                bitmap = BitmapFactory.decodeStream(inputStream);
+                inputStream.close();
             } catch (Exception e) {
-                Log.e(this.getClassLoader().getClass().toString(), "Error loading image");
+                Log.e(this.getClass().toString(), "Error loading image");
+                e.printStackTrace();
             }
             if (bitmap != null) {
                 profileImageView.setImageBitmap(bitmap);

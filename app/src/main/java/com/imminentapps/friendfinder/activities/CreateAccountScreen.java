@@ -1,6 +1,8 @@
 package com.imminentapps.friendfinder.activities;
 
+import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.support.annotation.Nullable;
@@ -17,6 +19,12 @@ import com.imminentapps.friendfinder.database.ProfileDao;
 import com.imminentapps.friendfinder.database.UserDao;
 import com.imminentapps.friendfinder.domain.Profile;
 import com.imminentapps.friendfinder.domain.User;
+
+import java.io.ByteArrayOutputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.UUID;
 
 /**
  * Activity for new user to create account
@@ -137,11 +145,42 @@ public class CreateAccountScreen extends AppCompatActivity {
         startActivityForResult(photoPickerIntent, 1);
     }
 
+    // https://stackoverflow.com/questions/10296734/image-uri-to-bytesarray
+    private byte[] getBytes(InputStream inputStream) throws IOException {
+        ByteArrayOutputStream byteBuffer = new ByteArrayOutputStream();
+        int bufferSize = 1024;
+        byte[] buffer = new byte[bufferSize];
+
+        int len = 0;
+        while ((len = inputStream.read(buffer)) != -1) {
+            byteBuffer.write(buffer, 0, len);
+        }
+        return byteBuffer.toByteArray();
+    }
+
     // https://stackoverflow.com/questions/2227209/how-to-get-the-images-from-device-in-android-java-application
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        String filename = emailView.getText().toString().concat("_profileImage_").concat(UUID.randomUUID().toString());
+        Uri filepath = data.getData();
+        FileOutputStream outputStream;
+
         if (resultCode == RESULT_OK) {
-            profileImageUri = data.getData().toString();
+            try {
+                InputStream inputStream = getContentResolver().openInputStream(filepath);
+                byte[] imageData = getBytes(inputStream);
+
+                outputStream = openFileOutput(filename, Context.MODE_PRIVATE);
+                outputStream.write(imageData);
+                outputStream.close();
+//
+//                FileOutputStream fileOutputStream = openFileOutput(filename, Context.MODE_PRIVATE);
+//                fileOutputStream.write(imageData);
+
+                profileImageUri = filename;
+            } catch (Exception e) {
+                Log.e("ERROR", "Error saving profile image.");
+            }
 
             Log.i("image", profileImageUri);
         }
