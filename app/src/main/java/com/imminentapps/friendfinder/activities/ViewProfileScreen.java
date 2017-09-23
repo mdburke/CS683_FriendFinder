@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.v4.view.GestureDetectorCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
@@ -19,7 +20,7 @@ import com.imminentapps.friendfinder.R;
 import com.imminentapps.friendfinder.domain.Profile;
 import com.imminentapps.friendfinder.domain.User;
 
-import java.io.IOException;
+import java.util.ArrayList;
 
 public class ViewProfileScreen extends AppCompatActivity implements GestureDetector.OnGestureListener {
     // Distance used to test for a valid swipe
@@ -49,15 +50,21 @@ public class ViewProfileScreen extends AppCompatActivity implements GestureDetec
 
         // Initialize vars/fields
         viewedProfile = viewedUser.getProfile();
-        TextView usernameView = (TextView) findViewById(R.id.usernameTextView);
-        ListView listView = (ListView) findViewById(R.id.hobbyListView);
-        TextView aboutMeView = (TextView) findViewById(R.id.aboutMeTextView);
-        profileImageView = (ImageView) findViewById(R.id.profileImageView);
-        friendIcon = (ImageView) findViewById(R.id.friendIcon);
+        TextView usernameView = findViewById(R.id.usernameTextView);
+        ListView listView = findViewById(R.id.hobbyListView);
+        TextView aboutMeView = findViewById(R.id.aboutMeTextView);
+        profileImageView = findViewById(R.id.profileImageView);
+        friendIcon = findViewById(R.id.friendIcon);
 
         // Setup the view based on the data
         usernameView.setText(viewedProfile.getUsername());
         aboutMeView.setText(viewedProfile.getAboutMeSection());
+
+        // TODO: Make a better default so this is no longer needed
+        if (viewedProfile.getHobbies() == null) {
+            viewedProfile.setHobbies(new ArrayList<>());
+        }
+
         ArrayAdapter adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, viewedProfile.getHobbies());
         listView.setAdapter(adapter);
         setupProfileImage();
@@ -77,8 +84,8 @@ public class ViewProfileScreen extends AppCompatActivity implements GestureDetec
 
             try {
                 bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), uri);
-            } catch (IOException e) {
-                e.printStackTrace();
+            } catch (Exception e) {
+                Log.e(this.getClassLoader().getClass().toString(), "Error loading image");
             }
             if (bitmap != null) {
                 profileImageView.setImageBitmap(bitmap);

@@ -17,8 +17,9 @@ import android.widget.Button;
 import android.widget.EditText;
 
 import com.imminentapps.friendfinder.R;
+import com.imminentapps.friendfinder.database.AppDatabase;
+import com.imminentapps.friendfinder.database.DBUtil;
 import com.imminentapps.friendfinder.domain.User;
-import com.imminentapps.friendfinder.mocks.MockUserDatabase;
 
 /**
  * A login screen that offers login via email/password.
@@ -28,7 +29,7 @@ public class LoginScreen extends AppCompatActivity implements LoaderCallbacks<Cu
      * A dummy authentication store containing known user names and passwords.
      * TODO: remove after connecting to a real authentication system.
      */
-    private static final MockUserDatabase userDatabase = MockUserDatabase.getDatabase();
+    private AppDatabase db;
 
     /**
      * Keep track of the login task to ensure we can cancel it if requested.
@@ -46,10 +47,11 @@ public class LoginScreen extends AppCompatActivity implements LoaderCallbacks<Cu
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login_screen);
+        db = DBUtil.getDBInstance();
 
         // Set up the login form.
-        mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
-        mPasswordView = (EditText) findViewById(R.id.password);
+        mEmailView = findViewById(R.id.email);
+        mPasswordView = findViewById(R.id.password);
         mPasswordView.setOnEditorActionListener((textView, id, keyEvent) -> {
             if (id == R.id.login || id == EditorInfo.IME_NULL) {
                 attemptLogin();
@@ -58,10 +60,10 @@ public class LoginScreen extends AppCompatActivity implements LoaderCallbacks<Cu
             return false;
         });
 
-        Button mEmailSignInButton = (Button) findViewById(R.id.email_sign_in_button);
+        Button mEmailSignInButton = findViewById(R.id.email_sign_in_button);
         mEmailSignInButton.setOnClickListener(view -> attemptLogin());
 
-        createAccountButton = (Button) findViewById(R.id.create_account_button);
+        createAccountButton = findViewById(R.id.create_account_button);
         createAccountButton.setOnClickListener(view -> goToCreateAccountScreen());
 
         mLoginFormView = findViewById(R.id.login_form);
@@ -196,7 +198,7 @@ public class LoginScreen extends AppCompatActivity implements LoaderCallbacks<Cu
             }
 
             // Check to see if user is registered to the mock database and password matches
-            User user = userDatabase.getUsers().get(mEmail);
+            User user = db.userDao().findByEmail(mEmail);
             return user != null && mPassword.equals(user.getPassword());
         }
 
