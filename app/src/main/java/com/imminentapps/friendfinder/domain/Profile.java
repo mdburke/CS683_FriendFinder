@@ -2,21 +2,27 @@ package com.imminentapps.friendfinder.domain;
 
 import android.arch.persistence.room.ColumnInfo;
 import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.ForeignKey;
+import android.arch.persistence.room.Ignore;
 import android.arch.persistence.room.PrimaryKey;
-import android.arch.persistence.room.Relation;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+
+import static android.arch.persistence.room.ForeignKey.CASCADE;
 
 /**
  * POJO to hold user profile information
  *
  * Created by mburke on 9/12/17.
  */
-@Entity
+@Entity(foreignKeys = @ForeignKey(
+        entity = User.class,
+        parentColumns = "id",
+        childColumns = "profile_id",
+        onDelete = CASCADE))
 public class Profile implements Serializable {
-    private String username;
 
     @ColumnInfo(name = "about_me_section")
     private String aboutMeSection;
@@ -30,16 +36,20 @@ public class Profile implements Serializable {
     @ColumnInfo(name = "profile_image_uri")
     private String profileImageUri;
 
+    @Ignore
+    private List<Hobby> hobbies;
+
+    private String username;
+
+    @PrimaryKey(autoGenerate = true)
+    @ColumnInfo(name = "profile_id")
+    private int profileId;
+
     @ColumnInfo(name = "user_id")
     private int userId;
 
-    @Relation(parentColumn = "id", entityColumn = "profile_id")
-    private List<String> hobbies;
-
-    @PrimaryKey(autoGenerate = true)
-    private int id;
-
-    public Profile(List<String> hobbies, String username, String aboutMeSection,
+    @Ignore
+    public Profile(List<Hobby> hobbies, String username, String aboutMeSection,
                    String firstName, String lastName, String profileImageUri) {
         this.hobbies = (hobbies != null) ? hobbies : new ArrayList<>();
         this.username = username;
@@ -49,7 +59,8 @@ public class Profile implements Serializable {
         this.profileImageUri = profileImageUri;
     }
 
-    public Profile(List<String> hobbies, String username, String aboutMeSection) {
+    @Ignore
+    public Profile(List<Hobby> hobbies, String username, String aboutMeSection) {
         this.hobbies = (hobbies != null) ? hobbies : new ArrayList<>();
         this.username = username;
         this.aboutMeSection = aboutMeSection;
@@ -57,11 +68,11 @@ public class Profile implements Serializable {
 
     public Profile() {}
 
-    public List<String> getHobbies() {
+    public List<Hobby> getHobbies() {
         return hobbies;
     }
 
-    public void setHobbies(List<String> hobbies) {
+    public void setHobbies(List<Hobby> hobbies) {
         this.hobbies = hobbies;
     }
 
@@ -105,8 +116,12 @@ public class Profile implements Serializable {
         this.profileImageUri = profileImage;
     }
 
-    public int getId() {
-        return id;
+    public int getProfileId() {
+        return profileId;
+    }
+
+    public void setProfileId(int profileId) {
+        this.profileId = profileId;
     }
 
     public int getUserId() {
@@ -115,10 +130,6 @@ public class Profile implements Serializable {
 
     public void setUserId(int userId) {
         this.userId = userId;
-    }
-
-    public void setId(int id) {
-        this.id = id;
     }
 
     @Override

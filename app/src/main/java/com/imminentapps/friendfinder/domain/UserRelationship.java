@@ -8,7 +8,7 @@ import android.arch.persistence.room.ForeignKey;
  * Created by mburke on 9/21/17.
  */
 @Entity(tableName = "user_relationship",
-        foreignKeys = @ForeignKey(entity = RelationshipType.class, parentColumns = "relationship_type", childColumns = "id"),
+        foreignKeys = @ForeignKey(entity = RelationshipType.class, parentColumns = "id", childColumns = "relationship_type"),
         primaryKeys = {"user_first_id", "user_second_id"})
 public class UserRelationship {
     /******   For this to work, we need to enforce user_first_id < user_second_id or we may have
@@ -22,6 +22,12 @@ public class UserRelationship {
 
     @ColumnInfo(name = "relationship_type")
     private int relationshipType;
+
+    public UserRelationship(int userFirstId, int userSecondId, int relationshipType) {
+        this.userFirstId = userFirstId;
+        this.userSecondId = userSecondId;
+        this.relationshipType = relationshipType;
+    }
 
     public int getUserFirstId() {
         return userFirstId;

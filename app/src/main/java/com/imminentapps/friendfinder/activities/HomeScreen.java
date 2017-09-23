@@ -12,40 +12,40 @@ import android.widget.TextView;
 
 import com.imminentapps.friendfinder.R;
 import com.imminentapps.friendfinder.database.AppDatabase;
+import com.imminentapps.friendfinder.database.DBUtil;
+import com.imminentapps.friendfinder.domain.Profile;
 import com.imminentapps.friendfinder.domain.User;
-import com.imminentapps.friendfinder.mocks.MockUserDatabase;
 
 public class HomeScreen extends AppCompatActivity {
-    private static final MockUserDatabase userDatabase = MockUserDatabase.getDatabase();
     private static final String DEFAULT_TAG = "DefaultTag";
     private TextView welcomeMessageTextView;
     private User currentUser;
+    private AppDatabase db;
 
     //************* Lifecycle Methods ************//
-
-    @Override
-    protected void onDestroy() {
-        AppDatabase.destroyInstance();
-        super.onDestroy();
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home_screen);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        db = DBUtil.getDBInstance();
+
         // Initialize the welcomeMessageTextView field
-        welcomeMessageTextView = (TextView) findViewById(R.id.textView);
+        welcomeMessageTextView = findViewById(R.id.textView);
 
         // Grab the user information from the database based on the email passed in
         Intent intent = getIntent();
-        currentUser = userDatabase.getUsers().get(intent.getCharSequenceExtra("email").toString());
+        currentUser = db.userDao().findByEmail((intent.getCharSequenceExtra("email").toString()));
         if (currentUser == null) {
             throw new IllegalStateException("HomeScreen was not able to locate" +
                 "the logged in user.");
         }
+        // TODO: Figure out how to get Room to pull the Profile info in with the previous Query
+        Profile userProfile = db.profileDao().findById(currentUser.getId());
+        currentUser.setProfile(userProfile);
 
         Log.i("email", currentUser.getEmail());
 

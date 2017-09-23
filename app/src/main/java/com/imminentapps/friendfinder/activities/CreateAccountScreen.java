@@ -2,6 +2,8 @@ package com.imminentapps.friendfinder.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.PersistableBundle;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -9,17 +11,20 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.imminentapps.friendfinder.R;
+import com.imminentapps.friendfinder.database.AppDatabase;
+import com.imminentapps.friendfinder.database.DBUtil;
+import com.imminentapps.friendfinder.database.ProfileDao;
+import com.imminentapps.friendfinder.database.UserDao;
 import com.imminentapps.friendfinder.domain.Profile;
 import com.imminentapps.friendfinder.domain.User;
-import com.imminentapps.friendfinder.mocks.MockUserDatabase;
-import com.imminentapps.friendfinder.utils.DBUtil;
 
 /**
  * Activity for new user to create account
  */
 public class CreateAccountScreen extends AppCompatActivity {
-    private static final MockUserDatabase userDatabase = MockUserDatabase.getDatabase();
-    private DBUtil dbUtil = new DBUtil(getApplicationContext());
+    private static UserDao userDao;
+    private static ProfileDao profileDao;
+    private static AppDatabase db;
 
     // Views
     private TextView usernameView;
@@ -34,17 +39,24 @@ public class CreateAccountScreen extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_account);
+        db = DBUtil.getDBInstance();
 
         // Initialize subviews
-        usernameView = (TextView) findViewById(R.id.enterUsernameField);
-        passwordView = (TextView) findViewById(R.id.enterPasswordField);
-        emailView = (TextView) findViewById(R.id.enterEmailField);
-        firstNameView = (TextView) findViewById(R.id.enterFirstNameField);
-        lastNameView = (TextView) findViewById(R.id.enterLastNameField);
-        createAccountButton = (Button) findViewById(R.id.createAccountButton);
+        usernameView = findViewById(R.id.enterUsernameField);
+        passwordView = findViewById(R.id.enterPasswordField);
+        emailView = findViewById(R.id.enterEmailField);
+        firstNameView = findViewById(R.id.enterFirstNameField);
+        lastNameView = findViewById(R.id.enterLastNameField);
+        createAccountButton = findViewById(R.id.createAccountButton);
 
         // Add onClickListener
         createAccountButton.setOnClickListener((view -> createAccountAndNavigateHome()));
+    }
+
+    @Override
+    public void onPostCreate(@Nullable Bundle savedInstanceState, @Nullable PersistableBundle persistentState) {
+        super.onPostCreate(savedInstanceState, persistentState);
+
     }
 
     /**
@@ -65,7 +77,9 @@ public class CreateAccountScreen extends AppCompatActivity {
                         profileImageUri));
 
         // Add the user to the MockDB
-        dbUtil.addUser(newUser);
+        // TODO: Figure out how to do this all in one transaction
+        db.userDao().insertUsers(newUser);
+        db.profileDao().insert(newUser.getProfile());
 
         // Navigate to the HomeScreen as if the user has just logged in
         Intent intent = new Intent(this, HomeScreen.class);
@@ -81,7 +95,7 @@ public class CreateAccountScreen extends AppCompatActivity {
      */
     private boolean validateEmail() {
         String email = emailView.getText().toString();
-        if (!email.contains("@") || userDatabase.containsEmail(email)) {
+        if (!email.contains("@") || (db.userDao().findByEmail(email) != null)) {
             emailView.setError("Invalid email address!");
             emailView.requestFocus();
             return false;
@@ -109,7 +123,7 @@ public class CreateAccountScreen extends AppCompatActivity {
      */
     private boolean validateUsername() {
         String username = usernameView.getText().toString();
-        if (username.length() < 5 || userDatabase.containsUsername(username)) {
+        if (username.length() < 5 || (db.profileDao().findByUsername(username) != null)) {
             usernameView.setError("Invalid username!");
             usernameView.requestFocus();
             return false;

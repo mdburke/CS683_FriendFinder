@@ -14,7 +14,7 @@ import java.util.List;
 @Dao
 public interface RelationshipTypeDao {
     @Query("SELECT * FROM relationship_type")
-    List<String> getAllTypes();
+    List<RelationshipType> getAllTypes();
 
     @Query("SELECT type FROM relationship_type WHERE id = :id")
     String getType(int id);

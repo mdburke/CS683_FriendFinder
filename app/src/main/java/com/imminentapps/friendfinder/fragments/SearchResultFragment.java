@@ -12,10 +12,12 @@ import android.view.ViewGroup;
 
 import com.imminentapps.friendfinder.R;
 import com.imminentapps.friendfinder.adapters.UserSearchResultViewAdapter;
+import com.imminentapps.friendfinder.domain.Profile;
 import com.imminentapps.friendfinder.domain.User;
-import com.imminentapps.friendfinder.mocks.MockUserDatabase;
 
 import java.util.ArrayList;
+
+import static com.imminentapps.friendfinder.database.DBUtil.db;
 
 /**
  * A fragment representing a list of Items.
@@ -68,8 +70,13 @@ public class SearchResultFragment extends Fragment {
             } else {
                 recyclerView.setLayoutManager(new GridLayoutManager(context, mColumnCount));
             }
+            // TODO: Figure out how to get this all in one transaction
             ArrayList<User> list = new ArrayList<>();
-            list.addAll(MockUserDatabase.getDatabase().getUsers().values());
+            list.addAll(db.userDao().getAll());
+            for (User user : list) {
+                Profile profile = db.profileDao().findById(user.getId());
+                user.setProfile(profile);
+            }
             recyclerView.setAdapter(new UserSearchResultViewAdapter(list, mListener));
         }
         return view;

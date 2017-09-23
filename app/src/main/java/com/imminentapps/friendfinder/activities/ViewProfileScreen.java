@@ -62,7 +62,7 @@ public class ViewProfileScreen extends AppCompatActivity implements GestureDetec
         listView.setAdapter(adapter);
         setupProfileImage();
 
-        if (!loggedInUser.isFriendsWith(viewedUser.getEmail())) {
+        if (!loggedInUser.isFriendsWith(viewedUser.getId(), getApplicationContext())) {
             friendIcon.setVisibility(View.INVISIBLE);
         }
 
@@ -126,11 +126,11 @@ public class ViewProfileScreen extends AppCompatActivity implements GestureDetec
         // Logic taken from: http://androidtuts4u.blogspot.com/2013/03/swipe-or-onfling-event-android.html
         if (event2.getX() - event1.getX() > SWIPE_MIN_DISTANCE) {
             // Detected left -> right swipe
-            loggedInUser.addFriend(viewedUser.getEmail());
+            loggedInUser.addFriend(viewedUser.getId(), getApplicationContext());
             friendIcon.setVisibility(View.VISIBLE);
         } else if (event1.getX() - event2.getX() > SWIPE_MIN_DISTANCE) {
             // Detected right -> left swipe
-            loggedInUser.removeFriend(viewedUser.getEmail());
+            loggedInUser.removeFriend(viewedUser.getId(), getApplicationContext());
             friendIcon.setVisibility(View.INVISIBLE);
         }
 

@@ -5,17 +5,22 @@ import android.arch.persistence.room.Room;
 import android.arch.persistence.room.RoomDatabase;
 import android.content.Context;
 
+import com.imminentapps.friendfinder.domain.Hobby;
+import com.imminentapps.friendfinder.domain.Profile;
 import com.imminentapps.friendfinder.domain.RelationshipType;
 import com.imminentapps.friendfinder.domain.User;
+import com.imminentapps.friendfinder.domain.UserRelationship;
 
 /**
  * Created by mburke on 9/21/17.
  */
-@Database(entities = {User.class}, version = 1)
+@Database(entities = {User.class, UserRelationship.class, RelationshipType.class,
+        Profile.class, Hobby.class}, version = 6)
 public abstract class AppDatabase extends RoomDatabase {
     private static AppDatabase INSTANCE;
 
     public abstract UserDao userDao();
+    public abstract ProfileDao profileDao();
     public abstract RelationshipTypeDao relationshipTypeDao();
     public abstract UserRelationshipDao userRelationshipDao();
 
@@ -26,7 +31,7 @@ public abstract class AppDatabase extends RoomDatabase {
                     "user-database")
                     .allowMainThreadQueries() // TODO: Remove this and use worker threads
                     .build();
-            populateRelationshipTypes();
+//            populateRelationshipTypes();
         }
         return INSTANCE;
     }

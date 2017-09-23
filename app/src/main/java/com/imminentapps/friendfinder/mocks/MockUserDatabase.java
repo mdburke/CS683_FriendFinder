@@ -1,11 +1,7 @@
 package com.imminentapps.friendfinder.mocks;
 
-import com.imminentapps.friendfinder.domain.Profile;
 import com.imminentapps.friendfinder.domain.User;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -59,19 +55,21 @@ public class MockUserDatabase {
 
     // Populates the list with fake data
     private void initializeMockDatabase() {
-        List<String> userOneHobbies = Arrays.asList("Soccer", "Golf", "Chess", "Reading");
-        List<String> userTwoHobbies = Arrays.asList("Cooking", "Football");
-        List<String> userThreeHobbies = Arrays.asList("Netflix", "Chess", "Reading");
-        List<String> userFourHobbies = Arrays.asList("Football", "Cooking", "Netflix", "Golf");
-
-        users = new HashMap<>();
-        users.put("user1@test.com", new User(
-                "user1@test.com", "Password1", new Profile(userOneHobbies, "User1", "My name is User1 and I need friends.")));
-        users.put("user2@test.com", new User(
-                "user2@test.com", "Password2", new Profile(userTwoHobbies, "User2", "My name is User2 and I'm real cool.")));
-        users.put("user3@test.com", new User(
-                "user3@test.com", "Password3", new Profile(userThreeHobbies, "User3", "My name is User3 and here is about me.")));
-        users.put("user4@test.com", new User(
-                "user4@test.com", "Password4", new Profile(userFourHobbies, "User4", "My name is User4 and I like to hit the dance floor!")));
+//        Hobby soccer =
+//
+//        List<Hobby> userOneHobbies = Arrays.asList("Soccer", "Golf", "Chess", "Reading");
+//        List<Hobby> userTwoHobbies = Arrays.asList("Cooking", "Football");
+//        List<Hobby> userThreeHobbies = Arrays.asList("Netflix", "Chess", "Reading");
+//        List<Hobby> userFourHobbies = Arrays.asList("Football", "Cooking", "Netflix", "Golf");
+//
+//        users = new HashMap<>();
+//        users.put("user1@test.com", new User(
+//                "user1@test.com", "Password1", new Profile(userOneHobbies, "User1", "My name is User1 and I need friends.")));
+//        users.put("user2@test.com", new User(
+//                "user2@test.com", "Password2", new Profile(userTwoHobbies, "User2", "My name is User2 and I'm real cool.")));
+//        users.put("user3@test.com", new User(
+//                "user3@test.com", "Password3", new Profile(userThreeHobbies, "User3", "My name is User3 and here is about me.")));
+//        users.put("user4@test.com", new User(
+//                "user4@test.com", "Password4", new Profile(userFourHobbies, "User4", "My name is User4 and I like to hit the dance floor!")));
     }
 }

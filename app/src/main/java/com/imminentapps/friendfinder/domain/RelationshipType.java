@@ -12,8 +12,6 @@ public class RelationshipType {
     private int id;
     private String type;
 
-    public RelationshipType() {}
-
     public RelationshipType(int id, String type) {
         this.id = id;
         this.type = type;

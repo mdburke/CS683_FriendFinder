@@ -1,8 +1,8 @@
 package com.imminentapps.friendfinder.domain;
 
 import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.Ignore;
 import android.arch.persistence.room.PrimaryKey;
-import android.arch.persistence.room.Relation;
 import android.content.Context;
 
 import com.imminentapps.friendfinder.database.AppDatabase;
@@ -20,12 +20,15 @@ public class User implements Serializable {
     @PrimaryKey(autoGenerate = true)
     private int id;
 
-    @Relation(parentColumn = "id", entityColumn = "user_id")
+    @Ignore
     private Profile profile;
 
     private String email;
     private String password;
 
+    public User() {}
+
+    @Ignore
     public User(String email, String password, Profile profile, int id) {
         this.password = password;
         this.email = email;
@@ -33,10 +36,12 @@ public class User implements Serializable {
         this.id = id;
     }
 
+    @Ignore
     public User(String email, String password, int id) {
         this(email, password, null, id);
     }
 
+    @Ignore
     public User(String email, String password, Profile profile) {
         this.email = email;
         this.password = password;
@@ -89,6 +94,38 @@ public class User implements Serializable {
 
         return AppDatabase.getAppDatabase(context).userRelationshipDao().getRelationship(firstId, secondId)
                 == Constants.RELATIONSHIP_TYPE_FRIENDS;
+    }
+
+    public void addFriend(int friendId, Context context) {
+        int firstId;
+        int secondId;
+
+        if (friendId < this.id) {
+            firstId = friendId;
+            secondId = this.id;
+        } else {
+            firstId = this.id;
+            secondId = friendId;
+        }
+
+        UserRelationship relationship = new UserRelationship(firstId, secondId, Constants.RELATIONSHIP_TYPE_FRIENDS);
+
+        AppDatabase.getAppDatabase(context).userRelationshipDao().insertRelationship(relationship);
+    }
+
+    public void removeFriend(int friendId, Context context) {
+        int firstId;
+        int secondId;
+
+        if (friendId < this.id) {
+            firstId = friendId;
+            secondId = this.id;
+        } else {
+            firstId = this.id;
+            secondId = friendId;
+        }
+
+        AppDatabase.getAppDatabase(context).userRelationshipDao().delete(firstId, secondId);
     }
 
     @Override
