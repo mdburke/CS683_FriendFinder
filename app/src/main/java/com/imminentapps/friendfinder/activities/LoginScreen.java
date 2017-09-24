@@ -20,7 +20,7 @@ import android.widget.EditText;
 
 import com.imminentapps.friendfinder.R;
 import com.imminentapps.friendfinder.database.AppDatabase;
-import com.imminentapps.friendfinder.database.DBUtil;
+import com.imminentapps.friendfinder.utils.DBUtil;
 import com.imminentapps.friendfinder.domain.User;
 
 import java.util.Date;

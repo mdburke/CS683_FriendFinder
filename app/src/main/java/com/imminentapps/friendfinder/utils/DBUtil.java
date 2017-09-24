@@ -1,6 +1,6 @@
-package com.imminentapps.friendfinder.database;
+package com.imminentapps.friendfinder.utils;
 
-import com.imminentapps.friendfinder.utils.FriendFinderApplication;
+import com.imminentapps.friendfinder.database.AppDatabase;
 
 /**
  * Method to access DB indirectly. Not currently using this for as much as possible.

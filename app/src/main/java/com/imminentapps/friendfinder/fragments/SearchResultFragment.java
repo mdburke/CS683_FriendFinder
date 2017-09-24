@@ -17,7 +17,7 @@ import com.imminentapps.friendfinder.domain.User;
 
 import java.util.ArrayList;
 
-import static com.imminentapps.friendfinder.database.DBUtil.db;
+import static com.imminentapps.friendfinder.utils.DBUtil.db;
 
 /**
  * A fragment representing a list of Items.
