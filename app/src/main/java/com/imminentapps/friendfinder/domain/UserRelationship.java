@@ -5,6 +5,7 @@ import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.ForeignKey;
 
 /**
+ * POJO to hold UserRelationship information.
  * Created by mburke on 9/21/17.
  */
 @Entity(tableName = "user_relationship",
