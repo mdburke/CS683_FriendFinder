@@ -23,6 +23,7 @@ import java.io.FileInputStream;
 import java.util.ArrayList;
 
 public class ViewProfileScreen extends AppCompatActivity implements GestureDetector.OnGestureListener {
+    private final String TAG = this.getClass().getSimpleName();
     // Distance used to test for a valid swipe
     private static final int SWIPE_MIN_DISTANCE = 120;
 
@@ -42,9 +43,11 @@ public class ViewProfileScreen extends AppCompatActivity implements GestureDetec
         Intent intent = getIntent();
 
         try {
+            // Grab the logged in user info and the viewed user info
             viewedUser = (User) intent.getSerializableExtra("viewedUser");
             loggedInUser = (User) intent.getSerializableExtra("loggedInUser");
         } catch (ClassCastException e) {
+            // TODO: Handle this state better
             throw new IllegalStateException("Activity was not passed a valid user object.");
         }
 
@@ -55,6 +58,7 @@ public class ViewProfileScreen extends AppCompatActivity implements GestureDetec
         TextView aboutMeView = findViewById(R.id.aboutMeTextView);
         profileImageView = findViewById(R.id.profileImageView);
         friendIcon = findViewById(R.id.friendIcon);
+        gestureDetectorCompat = new GestureDetectorCompat(this, this);
 
         // Setup the view based on the data
         usernameView.setText(viewedProfile.getUsername());
@@ -65,19 +69,26 @@ public class ViewProfileScreen extends AppCompatActivity implements GestureDetec
             viewedProfile.setHobbies(new ArrayList<>());
         }
 
+        // Setup the list adapter
         ArrayAdapter adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, viewedProfile.getHobbies());
         listView.setAdapter(adapter);
+
+        // Get the profile image
         setupProfileImage();
 
+        // Set the "star" to show if the users are friends.
         if (!loggedInUser.isFriendsWith(viewedUser.getId(), getApplicationContext())) {
             friendIcon.setVisibility(View.INVISIBLE);
         }
 
-        // Initialize gesture detector
-        this.gestureDetectorCompat = new GestureDetectorCompat(this, this);
     }
 
+    /**
+     * Grabs the profile image from the file system, transforms to Bitmap
+     * and set the profileImageView to that bitmap.
+     */
     private void setupProfileImage() {
+        // TODO: Add a default image if bitmap is null or the uri is null
         if (viewedProfile.getProfileImageUri() != null) {
             Bitmap bitmap = null;
             String uri = viewedProfile.getProfileImageUri();
@@ -91,6 +102,7 @@ public class ViewProfileScreen extends AppCompatActivity implements GestureDetec
                 Log.e(this.getClass().toString(), "Error loading image");
                 e.printStackTrace();
             }
+
             if (bitmap != null) {
                 profileImageView.setImageBitmap(bitmap);
             }
@@ -139,10 +151,12 @@ public class ViewProfileScreen extends AppCompatActivity implements GestureDetec
             // Detected left -> right swipe
             loggedInUser.addFriend(viewedUser.getId(), getApplicationContext());
             friendIcon.setVisibility(View.VISIBLE);
+            Log.i(TAG, "Left to right fling detected");
         } else if (event1.getX() - event2.getX() > SWIPE_MIN_DISTANCE) {
             // Detected right -> left swipe
             loggedInUser.removeFriend(viewedUser.getId(), getApplicationContext());
             friendIcon.setVisibility(View.INVISIBLE);
+            Log.i(TAG, "Right to left fling detected");
         }
 
         return true;

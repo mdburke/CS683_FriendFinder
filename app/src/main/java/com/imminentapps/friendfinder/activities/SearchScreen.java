@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.widget.ListView;
 
 import com.imminentapps.friendfinder.R;
 import com.imminentapps.friendfinder.domain.User;
@@ -12,7 +11,7 @@ import com.imminentapps.friendfinder.fragments.SearchResultFragment;
 
 public class SearchScreen extends AppCompatActivity implements
         SearchResultFragment.OnListFragmentInteractionListener {
-    private ListView searchResultsView;
+    private final String TAG = this.getClass().getSimpleName();
     private User loggedInUser;
 
     @Override
@@ -30,7 +29,7 @@ public class SearchScreen extends AppCompatActivity implements
 
     @Override
     public void onListFragmentInteraction(User user) {
-        Log.i("DefaultTag", "Navigating to View Profile page for user: " + user.getProfile().getUsername());
+        Log.i(TAG, "Navigating to View Profile page for user: " + user.getProfile().getUsername());
         Intent intent = new Intent(this, ViewProfileScreen.class);
         intent.putExtra("viewedUser", user);
         intent.putExtra("loggedInUser", loggedInUser);

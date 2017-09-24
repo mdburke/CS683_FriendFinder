@@ -12,7 +12,6 @@ import java.io.Serializable;
 
 /**
  * POJO to hold user information
- *
  * Created by mburke on 9/9/17.
  */
 @Entity
@@ -80,6 +79,8 @@ public class User implements Serializable {
         this.id = id;
     }
 
+    /******** Access Methods ********/
+    // TODO: Figure out the right place for these and implementation. Probably should not be grabbing the database here.
     public boolean isFriendsWith(int friendId, Context context) {
         int firstId;
         int secondId;

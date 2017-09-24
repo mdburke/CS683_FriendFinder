@@ -30,15 +30,9 @@ import java.util.concurrent.TimeUnit;
  * A login screen that offers login via email/password.
  */
 public class LoginScreen extends AppCompatActivity implements LoaderCallbacks<Cursor> {
-    /**
-     * A dummy authentication store containing known user names and passwords.
-     * TODO: remove after connecting to a real authentication system.
-     */
     private AppDatabase db;
 
-    /**
-     * Keep track of the login task to ensure we can cancel it if requested.
-     */
+    // Keep track of the login task to ensure we can cancel it if requested.
     private UserLoginTask mAuthTask = null;
 
     // UI references
@@ -55,6 +49,8 @@ public class LoginScreen extends AppCompatActivity implements LoaderCallbacks<Cu
         setContentView(R.layout.activity_login_screen);
         db = DBUtil.getDBInstance();
 
+        // Check to see if the user has saved their login information.
+        // If so, we skip the rest of this method.
         checkLoggedInFlag();
 
         // Set up the login form.
@@ -79,31 +75,29 @@ public class LoginScreen extends AppCompatActivity implements LoaderCallbacks<Cu
         stayLoggedInCheckBox = findViewById(R.id.stayLoggedInCheckbox);
     }
 
-    // TODO: Cleanup logic
+    /**
+     * Check if we have a stored preference with the login information.
+     * If we do, skip this screen and go straight to the home screen.
+     * TODO: Make this more secure.
+     */
     private void checkLoggedInFlag() {
         SharedPreferences preferences = getPreferences(MODE_PRIVATE);
         boolean stayLoggedIn = preferences.getBoolean("stayLoggedIn", false);
-        long expiration;
+        long expiration = preferences.getLong("expiration", 0L);
+        long currentTime = System.currentTimeMillis();
+        String email = preferences.getString("email", null);
 
-        // Check if the stayLoggedIn flag is set
-        if (!stayLoggedIn) {
-            return;
-        } else {
-            // If it is, get the expiration date
-            expiration = preferences.getLong("expiration", 0L);
-        }
+        // Check if the stayLoggedIn flag is set and if so,
+        // check if we are within the TTL and if the email address is set properly
+        if (stayLoggedIn &&
+            currentTime < expiration &&
+            email != null)  {
 
-        // Check if it has expired. If so, return to login screen. If not, proceed to HomeScreen
-        if (System.currentTimeMillis() > expiration) {
-            return;
-        } else {
+            // Skip the rest of the login screen and go to the home screen
             Intent intent = new Intent(this, HomeScreen.class);
             intent.putExtra("email", preferences.getString("email", null));
-
-            if (intent.getCharSequenceExtra("email") == null) { return; }
             startActivity(intent);
         }
-
     }
 
     /**
@@ -195,19 +189,27 @@ public class LoginScreen extends AppCompatActivity implements LoaderCallbacks<Cu
      * Passes the text from mEmailView along.
      */
     private void goToHomeScreen() {
-        // Set flags
+        SharedPreferences preferences = getPreferences(MODE_PRIVATE);
+        SharedPreferences.Editor editor = preferences.edit();
+
+        // Set preferences if the stayLoggedInCheckBox is checked.
         if (stayLoggedInCheckBox.isChecked()) {
-            SharedPreferences preferences = getPreferences(MODE_PRIVATE);
-            SharedPreferences.Editor editor = preferences.edit();
+            // Set the stayLoggedIn flag
             editor.putBoolean("stayLoggedIn", true);
 
+            // Set the TTL
             Date expiration = new Date(System.currentTimeMillis() + TimeUnit.DAYS.toMillis(1));
             editor.putLong("expiration", expiration.getTime());
 
+            // Set the user email to keep logged in
             editor.putString("email", mEmailView.getText().toString());
-
-            editor.apply();
+        } else {
+            // Clear things out just to be safe
+            editor.putBoolean("stayLoggedIn", false);
+            editor.putLong("expiration", 0L);
+            editor.putString("email", null);
         }
+        editor.apply();
 
         Intent intent = new Intent(this, HomeScreen.class);
         intent.putExtra("email", mEmailView.getText());

@@ -17,7 +17,7 @@ import com.imminentapps.friendfinder.domain.Profile;
 import com.imminentapps.friendfinder.domain.User;
 
 public class HomeScreen extends AppCompatActivity {
-    private static final String DEFAULT_TAG = "DefaultTag";
+    private final String TAG = this.getClass().getSimpleName();
     private TextView welcomeMessageTextView;
     private User currentUser;
     private AppDatabase db;
@@ -31,6 +31,7 @@ public class HomeScreen extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        // Grab the db instance
         db = DBUtil.getDBInstance();
 
         // Initialize the welcomeMessageTextView field
@@ -39,10 +40,12 @@ public class HomeScreen extends AppCompatActivity {
         // Grab the user information from the database based on the email passed in
         Intent intent = getIntent();
         currentUser = db.userDao().findByEmail((intent.getCharSequenceExtra("email").toString()));
+
+        // TODO: Handle this case better
         if (currentUser == null) {
-            throw new IllegalStateException("HomeScreen was not able to locate" +
-                "the logged in user.");
+            throw new IllegalStateException("HomeScreen was not able to locate the logged in user.");
         }
+
         // TODO: Figure out how to get Room to pull the Profile info in with the previous Query
         Profile userProfile = db.profileDao().findById(currentUser.getId());
         currentUser.setProfile(userProfile);
@@ -51,8 +54,7 @@ public class HomeScreen extends AppCompatActivity {
 
         // TODO: Figure out how to internationalize by using vars in strings.xml
         // Set welcome message to user name
-        welcomeMessageTextView.setText(getString(R.string.home_title) + " " +
-                currentUser.getProfile().getUsername());
+        welcomeMessageTextView.setText(getString(R.string.home_title) + " " + currentUser.getProfile().getUsername());
 
         // Initialize on click listeners for buttons
         initializeOnClickListeners();
@@ -99,7 +101,7 @@ public class HomeScreen extends AppCompatActivity {
         // Initialize Search For Friends button
         Button searchForFriendsButton = (Button) findViewById(R.id.buttonSearchForFriends);
         searchForFriendsButton.setOnClickListener((view) -> {
-            Log.i(DEFAULT_TAG, "Navigating to Search Page");
+            Log.i(TAG, "Navigating to Search Page");
             Intent intent = new Intent(this, SearchScreen.class);
             intent.putExtra("loggedInUser", currentUser);
             startActivity(intent);
@@ -108,7 +110,7 @@ public class HomeScreen extends AppCompatActivity {
         // Initialize Edit Profile button
         Button editProfileButton = (Button) findViewById(R.id.buttonEditProfile);
         editProfileButton.setOnClickListener((view) -> {
-            Log.i(DEFAULT_TAG, "Navigating to Edit Profile page");
+            Log.i(TAG, "Navigating to Edit Profile page");
             Intent intent = new Intent(this, EditProfileScreen.class);
             intent.putExtra("loggedInUser", currentUser);
             startActivity(intent);
@@ -117,7 +119,7 @@ public class HomeScreen extends AppCompatActivity {
         // Initialize Edit Account Settings button
         Button editAccountSettingsButton = (Button) findViewById(R.id.buttonEditAccountSettings);
         editAccountSettingsButton.setOnClickListener((view) -> {
-            Log.i(DEFAULT_TAG, "Navigating to Edit Account Settings page");
+            Log.i(TAG, "Navigating to Edit Account Settings page");
             Intent intent = new Intent(this, EditAccountSettingsScreen.class);
             intent.putExtra("loggedInUser", currentUser);
             startActivity(intent);

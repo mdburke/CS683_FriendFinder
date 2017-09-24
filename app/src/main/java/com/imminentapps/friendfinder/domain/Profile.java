@@ -14,7 +14,6 @@ import static android.arch.persistence.room.ForeignKey.CASCADE;
 
 /**
  * POJO to hold user profile information
- *
  * Created by mburke on 9/12/17.
  */
 @Entity(foreignKeys = @ForeignKey(
@@ -23,6 +22,10 @@ import static android.arch.persistence.room.ForeignKey.CASCADE;
         childColumns = "profile_id",
         onDelete = CASCADE))
 public class Profile implements Serializable {
+
+    @PrimaryKey(autoGenerate = true)
+    @ColumnInfo(name = "profile_id")
+    private int profileId;
 
     @ColumnInfo(name = "about_me_section")
     private String aboutMeSection;
@@ -36,17 +39,13 @@ public class Profile implements Serializable {
     @ColumnInfo(name = "profile_image_uri")
     private String profileImageUri;
 
+    @ColumnInfo(name = "user_id")
+    private int userId;
+
     @Ignore
     private List<Hobby> hobbies;
 
     private String username;
-
-    @PrimaryKey(autoGenerate = true)
-    @ColumnInfo(name = "profile_id")
-    private int profileId;
-
-    @ColumnInfo(name = "user_id")
-    private int userId;
 
     @Ignore
     public Profile(List<Hobby> hobbies, String username, String aboutMeSection,

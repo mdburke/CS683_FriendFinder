@@ -12,18 +12,23 @@ import com.imminentapps.friendfinder.domain.User;
 import com.imminentapps.friendfinder.domain.UserRelationship;
 
 /**
+ * "Room" database class that holds the configuration of the db.
+ *
  * Created by mburke on 9/21/17.
  */
 @Database(entities = {User.class, UserRelationship.class, RelationshipType.class,
         Profile.class, Hobby.class}, version = 6)
 public abstract class AppDatabase extends RoomDatabase {
+    // Singleton instance
     private static AppDatabase INSTANCE;
 
+    // Declare DAO objects
     public abstract UserDao userDao();
     public abstract ProfileDao profileDao();
     public abstract RelationshipTypeDao relationshipTypeDao();
     public abstract UserRelationshipDao userRelationshipDao();
 
+    // Singleton accessor
     public static AppDatabase getAppDatabase(Context context) {
         if (INSTANCE == null) {
             INSTANCE = Room.databaseBuilder(context.getApplicationContext(),
@@ -31,7 +36,6 @@ public abstract class AppDatabase extends RoomDatabase {
                     "user-database")
                     .allowMainThreadQueries() // TODO: Remove this and use worker threads
                     .build();
-//            populateRelationshipTypes();
         }
         return INSTANCE;
     }
@@ -41,6 +45,8 @@ public abstract class AppDatabase extends RoomDatabase {
         INSTANCE = null;
     }
 
+    // Need to populate the relationshipsTypes table with some values.
+    // TODO: fix implementation (was getting NPEs when calling this method in getAppDatabase)
     private static void populateRelationshipTypes() {
         RelationshipType[] relationshipTypes = new RelationshipType[3];
         relationshipTypes[0] = new RelationshipType(1, "pending_first_second");

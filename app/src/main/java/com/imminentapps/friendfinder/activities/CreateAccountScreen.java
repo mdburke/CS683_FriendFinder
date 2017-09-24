@@ -4,8 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.PersistableBundle;
-import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -15,8 +13,6 @@ import android.widget.TextView;
 import com.imminentapps.friendfinder.R;
 import com.imminentapps.friendfinder.database.AppDatabase;
 import com.imminentapps.friendfinder.database.DBUtil;
-import com.imminentapps.friendfinder.database.ProfileDao;
-import com.imminentapps.friendfinder.database.UserDao;
 import com.imminentapps.friendfinder.domain.Profile;
 import com.imminentapps.friendfinder.domain.User;
 
@@ -30,8 +26,7 @@ import java.util.UUID;
  * Activity for new user to create account
  */
 public class CreateAccountScreen extends AppCompatActivity {
-    private static UserDao userDao;
-    private static ProfileDao profileDao;
+    private final String TAG = this.getClass().getSimpleName();
     private static AppDatabase db;
 
     // Views
@@ -61,12 +56,6 @@ public class CreateAccountScreen extends AppCompatActivity {
         createAccountButton.setOnClickListener((view -> createAccountAndNavigateHome()));
     }
 
-    @Override
-    public void onPostCreate(@Nullable Bundle savedInstanceState, @Nullable PersistableBundle persistentState) {
-        super.onPostCreate(savedInstanceState, persistentState);
-
-    }
-
     /**
      * Validates the email, password and username. If these are valid,
      * this creates the new user, adds it to the mock DB, and navigates to the home screen.
@@ -75,16 +64,17 @@ public class CreateAccountScreen extends AppCompatActivity {
         // Guard Clause
         if (!validateEmail() || !validatePassword() || !validateUsername()) { return; }
 
-        // Create the new user with the given information
-        User newUser = new User(emailView.getText().toString(), passwordView.getText().toString(),
-                new Profile(null,
-                        usernameView.getText().toString(),
-                        null,
-                        firstNameView.getText().toString(),
-                        lastNameView.getText().toString(),
-                        profileImageUri));
+        // Create the new profile and user with the given information
+        Profile profile = new Profile(null,
+                usernameView.getText().toString(), null,
+                firstNameView.getText().toString(),
+                lastNameView.getText().toString(),
+                profileImageUri);
 
-        // Add the user to the MockDB
+        User newUser = new User(emailView.getText().toString(),
+                passwordView.getText().toString(), profile);
+
+        // Add the user to the Database
         // TODO: Figure out how to do this all in one transaction
         db.userDao().insertUsers(newUser);
         db.profileDao().insert(newUser.getProfile());
@@ -139,50 +129,72 @@ public class CreateAccountScreen extends AppCompatActivity {
         return true;
     }
 
+    /**
+     * Use the photo picker to grab an image.
+     */
     public void selectProfileImage(View view) {
         Intent photoPickerIntent = new Intent(Intent.ACTION_GET_CONTENT);
         photoPickerIntent.setType("image/*");
         startActivityForResult(photoPickerIntent, 1);
     }
 
-    // https://stackoverflow.com/questions/10296734/image-uri-to-bytesarray
+    /**
+     * Callback for the profile image picker. This grabs the data from the photo picker
+     * and stores it in the file system for easy loading in the future.
+     *
+     * @param requestCode
+     * @param resultCode
+     * @param data
+     */
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        FileOutputStream outputStream = null;
+
+        // Create a unique file name for this image.
+        String filename = emailView.getText().toString().concat("_profileImage_").concat(UUID.randomUUID().toString());
+        // Grab the data uri
+        Uri filepath = data.getData();
+
+        if (resultCode == RESULT_OK) {
+            try {
+                // Adapted from https://stackoverflow.com/questions/2227209/how-to-get-the-images-from-device-in-android-java-application
+                InputStream inputStream = getContentResolver().openInputStream(filepath);
+                byte[] imageData = getBytes(inputStream);
+
+                // Write the image to the file system.
+                outputStream = openFileOutput(filename, Context.MODE_PRIVATE);
+                outputStream.write(imageData);
+
+                // Save the uri to the profile
+                profileImageUri = filename;
+            } catch (Exception e) {
+                Log.e(TAG, "Error saving profile image.");
+            } finally {
+                if (outputStream != null) {
+                    try {
+                        outputStream.close();
+                    } catch (IOException e) {
+                        Log.e(TAG, "Error closing output stream.");
+                    }
+                }
+            }
+            Log.i(TAG, "Profile image uri is " + profileImageUri);
+        }
+    }
+
+    // Adapted from https://stackoverflow.com/questions/10296734/image-uri-to-bytesarray
+    /**
+     * Converts an input stream into a byte array
+     */
     private byte[] getBytes(InputStream inputStream) throws IOException {
         ByteArrayOutputStream byteBuffer = new ByteArrayOutputStream();
         int bufferSize = 1024;
         byte[] buffer = new byte[bufferSize];
 
-        int len = 0;
+        int len;
         while ((len = inputStream.read(buffer)) != -1) {
             byteBuffer.write(buffer, 0, len);
         }
         return byteBuffer.toByteArray();
-    }
-
-    // https://stackoverflow.com/questions/2227209/how-to-get-the-images-from-device-in-android-java-application
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        String filename = emailView.getText().toString().concat("_profileImage_").concat(UUID.randomUUID().toString());
-        Uri filepath = data.getData();
-        FileOutputStream outputStream;
-
-        if (resultCode == RESULT_OK) {
-            try {
-                InputStream inputStream = getContentResolver().openInputStream(filepath);
-                byte[] imageData = getBytes(inputStream);
-
-                outputStream = openFileOutput(filename, Context.MODE_PRIVATE);
-                outputStream.write(imageData);
-                outputStream.close();
-//
-//                FileOutputStream fileOutputStream = openFileOutput(filename, Context.MODE_PRIVATE);
-//                fileOutputStream.write(imageData);
-
-                profileImageUri = filename;
-            } catch (Exception e) {
-                Log.e("ERROR", "Error saving profile image.");
-            }
-
-            Log.i("image", profileImageUri);
-        }
     }
 }

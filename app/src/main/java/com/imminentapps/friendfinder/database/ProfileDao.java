@@ -7,6 +7,7 @@ import android.arch.persistence.room.Query;
 import com.imminentapps.friendfinder.domain.Profile;
 
 /**
+ * Database Access Object for the Profile class
  * Created by mburke on 9/22/17.
  */
 @Dao

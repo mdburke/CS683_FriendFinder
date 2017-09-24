@@ -6,6 +6,7 @@ import android.arch.persistence.room.ForeignKey;
 import android.arch.persistence.room.PrimaryKey;
 
 /**
+ * POJO for holding Hobby information.
  * Created by mburke on 9/21/17.
  */
 @Entity(foreignKeys = @ForeignKey(entity = Profile.class, parentColumns = "profile_id", childColumns = "profile_id"))

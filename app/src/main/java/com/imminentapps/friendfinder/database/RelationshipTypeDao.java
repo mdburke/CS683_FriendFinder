@@ -9,6 +9,7 @@ import com.imminentapps.friendfinder.domain.RelationshipType;
 import java.util.List;
 
 /**
+ * Database Access Object for the RelationshipType class
  * Created by mburke on 9/21/17.
  */
 @Dao

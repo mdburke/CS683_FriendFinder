@@ -4,6 +4,7 @@ import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.PrimaryKey;
 
 /**
+ * POJO for holding RelationshipType information
  * Created by mburke on 9/21/17.
  */
 @Entity(tableName = "relationship_type")

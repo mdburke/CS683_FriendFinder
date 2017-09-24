@@ -11,6 +11,7 @@ import com.imminentapps.friendfinder.domain.User;
 import java.util.List;
 
 /**
+ * Database Access Object for the User class
  * Created by mburke on 9/21/17.
  */
 @Dao

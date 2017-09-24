@@ -7,6 +7,7 @@ import android.arch.persistence.room.Query;
 import com.imminentapps.friendfinder.domain.UserRelationship;
 
 /**
+ * Database Access Object for the UserRelationship class
  * Created by mburke on 9/21/17.
  */
 @Dao
