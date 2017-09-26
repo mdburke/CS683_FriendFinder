@@ -48,6 +48,7 @@ public class LoginScreen extends AppCompatActivity implements LoaderCallbacks<Cu
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login_screen);
         db = DBUtil.getDBInstance();
+//        DBUtil.populateWithTestData();
 
         // Check to see if the user has saved their login information.
         // If so, we skip the rest of this method.

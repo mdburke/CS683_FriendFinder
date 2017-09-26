@@ -11,7 +11,7 @@ import com.imminentapps.friendfinder.database.AppDatabase;
 public class DBUtil {
     public static AppDatabase db = FriendFinderApplication.getDatabaseInstance();
 
-    private static void populateWithTestData() {}
-
-    public static AppDatabase getDBInstance() { return db; }
+    public static AppDatabase getDBInstance() {
+        return db;
+    }
 }
