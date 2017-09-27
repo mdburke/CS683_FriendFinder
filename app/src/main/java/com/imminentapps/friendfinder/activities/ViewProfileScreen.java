@@ -53,10 +53,10 @@ public class ViewProfileScreen extends AppCompatActivity implements GestureDetec
 
         // Initialize vars/fields
         viewedProfile = viewedUser.getProfile();
-        TextView usernameView = findViewById(R.id.usernameTextView);
+        TextView usernameView = findViewById(R.id.editprofile_usernameTextView);
         ListView listView = findViewById(R.id.hobbyListView);
-        TextView aboutMeView = findViewById(R.id.aboutMeTextView);
-        profileImageView = findViewById(R.id.profileImageView);
+        TextView aboutMeView = findViewById(R.id.editprofile_aboutMeTextView);
+        profileImageView = findViewById(R.id.editprofile_profileImageView);
         friendIcon = findViewById(R.id.friendIcon);
         gestureDetectorCompat = new GestureDetectorCompat(this, this);
 

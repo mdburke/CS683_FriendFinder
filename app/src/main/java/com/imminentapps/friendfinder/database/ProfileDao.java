@@ -3,6 +3,7 @@ package com.imminentapps.friendfinder.database;
 import android.arch.persistence.room.Dao;
 import android.arch.persistence.room.Insert;
 import android.arch.persistence.room.Query;
+import android.arch.persistence.room.Update;
 
 import com.imminentapps.friendfinder.domain.Profile;
 
@@ -19,5 +20,8 @@ public interface ProfileDao {
     Profile findById(int id);
 
     @Insert
-    void insert(Profile profile);
+    void insert(Profile... profiles);
+
+    @Update
+    void update(Profile... profiles);
 }

@@ -3,6 +3,7 @@ package com.imminentapps.friendfinder.domain;
 import android.arch.persistence.room.ColumnInfo;
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.ForeignKey;
+import android.arch.persistence.room.Ignore;
 import android.arch.persistence.room.PrimaryKey;
 
 /**
@@ -21,6 +22,12 @@ public class Hobby {
 
     public Hobby(int id, int profileId, String hobby) {
         this.id = id;
+        this.profileId = profileId;
+        this.hobby = hobby;
+    }
+
+    @Ignore
+    public Hobby(int profileId, String hobby) {
         this.profileId = profileId;
         this.hobby = hobby;
     }

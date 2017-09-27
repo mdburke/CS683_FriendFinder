@@ -112,7 +112,7 @@ public class HomeScreen extends AppCompatActivity {
         editProfileButton.setOnClickListener((view) -> {
             Log.i(TAG, "Navigating to Edit Profile page");
             Intent intent = new Intent(this, EditProfileScreen.class);
-            intent.putExtra("loggedInUser", currentUser);
+            intent.putExtra("email", currentUser.getEmail());
             startActivity(intent);
         });
 
