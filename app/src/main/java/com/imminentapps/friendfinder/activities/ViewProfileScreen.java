@@ -18,11 +18,9 @@ import android.widget.TextView;
 import com.imminentapps.friendfinder.R;
 import com.imminentapps.friendfinder.domain.Profile;
 import com.imminentapps.friendfinder.domain.User;
+import com.imminentapps.friendfinder.utils.UserUtil;
 
 import java.io.FileInputStream;
-import java.util.ArrayList;
-
-import static com.imminentapps.friendfinder.utils.DBUtil.db;
 
 public class ViewProfileScreen extends AppCompatActivity implements GestureDetector.OnGestureListener {
     private final String TAG = this.getClass().getSimpleName();
@@ -30,12 +28,15 @@ public class ViewProfileScreen extends AppCompatActivity implements GestureDetec
     private static final int SWIPE_MIN_DISTANCE = 120;
 
     // Instance vars
-    private User viewedUser;
-    private User loggedInUser;
-    private Profile viewedProfile;
+    private User selectedUser;
+    private User currentUser;
+    private Profile selectedProfile;
     private GestureDetectorCompat gestureDetectorCompat;
     private ImageView friendIcon;
     private ImageView profileImageView;
+    private TextView usernameView;
+    private ListView listView;
+    private TextView aboutMeView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,44 +45,37 @@ public class ViewProfileScreen extends AppCompatActivity implements GestureDetec
 
         Intent intent = getIntent();
 
-        try {
-            // Grab the logged in user info and the viewed user info
-            viewedUser = (User) intent.getSerializableExtra("viewedUser");
-            loggedInUser = (User) intent.getSerializableExtra("loggedInUser");
-        } catch (ClassCastException e) {
-            // TODO: Handle this state better
-            throw new IllegalStateException("Activity was not passed a valid user object.");
+        // Grab the logged in user info and the viewed user info
+        selectedUser = UserUtil.loadUser(intent.getCharSequenceExtra("selectedUserEmail").toString());
+        currentUser = UserUtil.loadUser(intent.getCharSequenceExtra("currentUserEmail").toString());
+
+        // TODO: Handle this case better
+        if (currentUser == null || selectedUser == null) {
+            throw new IllegalStateException("View Profile Screen was not able to locate the users.");
         }
 
         // Initialize vars/fields
-        viewedProfile = viewedUser.getProfile();
-        TextView usernameView = findViewById(R.id.editprofile_usernameTextView);
-        ListView listView = findViewById(R.id.hobbyListView);
-        TextView aboutMeView = findViewById(R.id.editprofile_aboutMeTextView);
+        selectedProfile = selectedUser.getProfile();
+        usernameView = findViewById(R.id.editprofile_usernameTextView);
+        listView = findViewById(R.id.hobbyListView);
+        aboutMeView = findViewById(R.id.editprofile_aboutMeTextView);
         profileImageView = findViewById(R.id.editprofile_profileImageView);
         friendIcon = findViewById(R.id.friendIcon);
         gestureDetectorCompat = new GestureDetectorCompat(this, this);
 
         // Setup the view based on the data
-        usernameView.setText(viewedProfile.getUsername());
-        aboutMeView.setText(viewedProfile.getAboutMeSection());
-
-        // TODO: Make a better default so this is no longer needed
-        if (viewedProfile.getHobbies() == null) {
-            viewedProfile.setHobbies(new ArrayList<>());
-        }
-
-        viewedProfile.setHobbies(db.hobbyDao().getHobbyByProfileId(viewedProfile.getProfileId()));
+        usernameView.setText(selectedProfile.getUsername());
+        aboutMeView.setText(UserUtil.getAboutMeText(selectedUser));
 
         // Setup the list adapter
-        ArrayAdapter adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, viewedProfile.getHobbiesAsStrings());
+        ArrayAdapter adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, selectedProfile.getHobbiesAsStrings());
         listView.setAdapter(adapter);
 
         // Get the profile image
         setupProfileImage();
 
         // Set the "star" to show if the users are friends.
-        if (!loggedInUser.isFriendsWith(viewedUser.getId(), getApplicationContext())) {
+        if (!currentUser.isFriendsWith(selectedUser.getId(), getApplicationContext())) {
             friendIcon.setVisibility(View.INVISIBLE);
         }
 
@@ -93,9 +87,9 @@ public class ViewProfileScreen extends AppCompatActivity implements GestureDetec
      */
     private void setupProfileImage() {
         // TODO: Add a default image if bitmap is null or the uri is null
-        if (viewedProfile.getProfileImageUri() != null) {
+        if (selectedProfile.getProfileImageUri() != null) {
             Bitmap bitmap = null;
-            String uri = viewedProfile.getProfileImageUri();
+            String uri = selectedProfile.getProfileImageUri();
             FileInputStream inputStream;
 
             try {
@@ -153,12 +147,12 @@ public class ViewProfileScreen extends AppCompatActivity implements GestureDetec
         // Logic taken from: http://androidtuts4u.blogspot.com/2013/03/swipe-or-onfling-event-android.html
         if (event2.getX() - event1.getX() > SWIPE_MIN_DISTANCE) {
             // Detected left -> right swipe
-            loggedInUser.addFriend(viewedUser.getId(), getApplicationContext());
+            currentUser.addFriend(selectedUser.getId(), getApplicationContext());
             friendIcon.setVisibility(View.VISIBLE);
             Log.i(TAG, "Left to right fling detected");
         } else if (event1.getX() - event2.getX() > SWIPE_MIN_DISTANCE) {
             // Detected right -> left swipe
-            loggedInUser.removeFriend(viewedUser.getId(), getApplicationContext());
+            currentUser.removeFriend(selectedUser.getId(), getApplicationContext());
             friendIcon.setVisibility(View.INVISIBLE);
             Log.i(TAG, "Right to left fling detected");
         }

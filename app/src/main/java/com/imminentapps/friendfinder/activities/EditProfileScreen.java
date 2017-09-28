@@ -17,11 +17,12 @@ import com.imminentapps.friendfinder.domain.Hobby;
 import com.imminentapps.friendfinder.domain.Profile;
 import com.imminentapps.friendfinder.domain.User;
 import com.imminentapps.friendfinder.utils.DBUtil;
-
-import org.apache.commons.lang3.StringUtils;
+import com.imminentapps.friendfinder.utils.UserUtil;
 
 import java.io.FileInputStream;
-import java.util.List;
+
+import static com.imminentapps.friendfinder.utils.UserUtil.getAboutMeText;
+import static com.imminentapps.friendfinder.utils.UserUtil.getHobbyListText;
 
 public class EditProfileScreen extends AppCompatActivity {
     private final String TAG = this.getClass().getSimpleName();
@@ -31,6 +32,8 @@ public class EditProfileScreen extends AppCompatActivity {
     private ImageView profileImageView;
     private EditText hobbyList;
     private EditText aboutMeView;
+    private TextView usernameView;
+    private Button saveButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,50 +42,34 @@ public class EditProfileScreen extends AppCompatActivity {
         db = DBUtil.getDBInstance();
 
         Intent intent = getIntent();
-        currentUser = db.userDao().findByEmail((intent.getCharSequenceExtra("email").toString()));
-
+        currentUser = UserUtil.loadUser(intent.getCharSequenceExtra("currentUserEmail").toString());
 
         // TODO: Handle this case better
         if (currentUser == null) {
             throw new IllegalStateException("Edit Profile Screen was not able to locate the logged in user.");
         }
-        // TODO: Figure out how to get Room to pull the Profile info in with the previous Query
-        Profile userProfile = db.profileDao().findById(currentUser.getId());
-        currentUser.setProfile(userProfile);
-        int profileId = currentUser.getProfile().getProfileId();
-        List<Hobby> hobbyfromdb = db.hobbyDao().getHobbyByProfileId(profileId);
-        currentUser.getProfile().setHobbies(hobbyfromdb);
 
         // Initialize vars/fields
-        TextView usernameView = findViewById(R.id.editprofile_usernameTextView);
+        usernameView = findViewById(R.id.editprofile_usernameTextView);
         aboutMeView = findViewById(R.id.editprofile_aboutMeEdit);
         profileImageView = findViewById(R.id.editprofile_profileImageView);
         hobbyList = findViewById(R.id.editprofile_hobbyList);
-        Button saveButton = findViewById(R.id.editprofile_saveButton);
+        saveButton = findViewById(R.id.editprofile_saveButton);
 
-        // Set text
+        // Set the views with the user data
         usernameView.setText(currentUser.getProfile().getUsername());
-
-        if (currentUser.getProfile().getAboutMeSection() != null) {
-            aboutMeView.setText(currentUser.getProfile().getAboutMeSection());
-        }
-
-        List<Hobby> hobbies = currentUser.getProfile().getHobbies();
-        String hobbieString = hobbyListToText(hobbies).toString();
-
-        hobbyList.setText(hobbieString);
+        aboutMeView.setText(getAboutMeText(currentUser));
+        hobbyList.setText(getHobbyListText(currentUser));
+        setupProfileImage();
 
         // Add onClickListeners
         saveButton.setOnClickListener(view -> saveButtonClicked());
-
-        // Get the profile image
-        setupProfileImage();
     }
 
     private void saveButtonClicked() {
         // Get the new data to save
         int profileId = currentUser.getProfile().getProfileId();
-        Hobby[] hobbies = textToHobbyArray(profileId, hobbyList.getText().toString());
+        Hobby[] hobbies = UserUtil.textToHobbyArray(profileId, hobbyList.getText().toString());
         String aboutMe = aboutMeView.getText().toString();
         Profile profile = currentUser.getProfile();
         profile.setAboutMeSection(aboutMe);
@@ -116,29 +103,5 @@ public class EditProfileScreen extends AppCompatActivity {
                 profileImageView.setImageBitmap(bitmap);
             }
         }
-    }
-
-    private StringBuilder hobbyListToText(List<Hobby> hobbies) {
-        StringBuilder hobbyString = new StringBuilder();
-
-        for (int i = 0; i < hobbies.size(); i++) {
-            if (i != 0) {
-                hobbyString.append(", ");
-            }
-            hobbyString.append(hobbies.get(i).getHobby());
-        }
-
-        return hobbyString;
-    }
-
-    private Hobby[] textToHobbyArray(int profileId, String hobbies) {
-        String[] hobbyStringArray = StringUtils.split(hobbies, ", ");
-        Hobby[] hobbyArray = new Hobby[hobbyStringArray.length];
-
-        for (int i = 0; i < hobbyArray.length; i++) {
-            hobbyArray[i] = new Hobby(profileId, hobbyStringArray[i]);
-        }
-
-        return hobbyArray;
     }
 }

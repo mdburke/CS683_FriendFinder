@@ -81,7 +81,7 @@ public class CreateAccountScreen extends AppCompatActivity {
 
         // Navigate to the HomeScreen as if the user has just logged in
         Intent intent = new Intent(this, HomeScreen.class);
-        intent.putExtra("email", emailView.getText());
+        intent.putExtra("currentUserEmail", emailView.getText());
         startActivity(intent);
     }
 

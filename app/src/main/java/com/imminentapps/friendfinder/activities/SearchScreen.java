@@ -8,11 +8,12 @@ import android.util.Log;
 import com.imminentapps.friendfinder.R;
 import com.imminentapps.friendfinder.domain.User;
 import com.imminentapps.friendfinder.fragments.SearchResultFragment;
+import com.imminentapps.friendfinder.utils.UserUtil;
 
 public class SearchScreen extends AppCompatActivity implements
         SearchResultFragment.OnListFragmentInteractionListener {
     private final String TAG = this.getClass().getSimpleName();
-    private User loggedInUser;
+    private User currentUser;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -20,10 +21,11 @@ public class SearchScreen extends AppCompatActivity implements
         setContentView(R.layout.activity_search_screen);
 
         Intent intent = getIntent();
-        try {
-            loggedInUser = (User) intent.getSerializableExtra("loggedInUser");
-        } catch (ClassCastException e) {
-            throw new IllegalStateException("Activity was not passed a valid user object.");
+        currentUser = UserUtil.loadUser(intent.getCharSequenceExtra("currentUserEmail").toString());
+
+        // TODO: Handle this case better
+        if (currentUser == null) {
+            throw new IllegalStateException("Edit Profile Screen was not able to locate the logged in user.");
         }
     }
 
@@ -31,8 +33,8 @@ public class SearchScreen extends AppCompatActivity implements
     public void onListFragmentInteraction(User user) {
         Log.i(TAG, "Navigating to View Profile page for user: " + user.getProfile().getUsername());
         Intent intent = new Intent(this, ViewProfileScreen.class);
-        intent.putExtra("viewedUser", user);
-        intent.putExtra("loggedInUser", loggedInUser);
+        intent.putExtra("currentUserEmail", user.getEmail());
+        intent.putExtra("selectedUserEmail", currentUser.getEmail());
         startActivity(intent);
     }
 }

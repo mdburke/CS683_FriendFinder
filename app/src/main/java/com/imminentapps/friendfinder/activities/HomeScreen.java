@@ -30,8 +30,6 @@ public class HomeScreen extends AppCompatActivity {
         setContentView(R.layout.activity_home_screen);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
-        // Grab the db instance
         db = DBUtil.getDBInstance();
 
         // Initialize the welcomeMessageTextView field
@@ -39,7 +37,7 @@ public class HomeScreen extends AppCompatActivity {
 
         // Grab the user information from the database based on the email passed in
         Intent intent = getIntent();
-        currentUser = db.userDao().findByEmail((intent.getCharSequenceExtra("email").toString()));
+        currentUser = db.userDao().findByEmail((intent.getCharSequenceExtra("currentUserEmail").toString()));
 
         // TODO: Handle this case better
         if (currentUser == null) {
@@ -49,8 +47,6 @@ public class HomeScreen extends AppCompatActivity {
         // TODO: Figure out how to get Room to pull the Profile info in with the previous Query
         Profile userProfile = db.profileDao().findById(currentUser.getId());
         currentUser.setProfile(userProfile);
-
-        Log.i("email", currentUser.getEmail());
 
         // TODO: Figure out how to internationalize by using vars in strings.xml
         // Set welcome message to user name
@@ -99,29 +95,29 @@ public class HomeScreen extends AppCompatActivity {
      */
     private void initializeOnClickListeners() {
         // Initialize Search For Friends button
-        Button searchForFriendsButton = (Button) findViewById(R.id.buttonSearchForFriends);
+        Button searchForFriendsButton = findViewById(R.id.buttonSearchForFriends);
         searchForFriendsButton.setOnClickListener((view) -> {
             Log.i(TAG, "Navigating to Search Page");
             Intent intent = new Intent(this, SearchScreen.class);
-            intent.putExtra("loggedInUser", currentUser);
+            intent.putExtra("currentUserEmail", currentUser.getEmail());
             startActivity(intent);
         });
 
         // Initialize Edit Profile button
-        Button editProfileButton = (Button) findViewById(R.id.buttonEditProfile);
+        Button editProfileButton = findViewById(R.id.buttonEditProfile);
         editProfileButton.setOnClickListener((view) -> {
             Log.i(TAG, "Navigating to Edit Profile page");
             Intent intent = new Intent(this, EditProfileScreen.class);
-            intent.putExtra("email", currentUser.getEmail());
+            intent.putExtra("currentUserEmail", currentUser.getEmail());
             startActivity(intent);
         });
 
         // Initialize Edit Account Settings button
-        Button editAccountSettingsButton = (Button) findViewById(R.id.buttonEditAccountSettings);
+        Button editAccountSettingsButton = findViewById(R.id.buttonEditAccountSettings);
         editAccountSettingsButton.setOnClickListener((view) -> {
             Log.i(TAG, "Navigating to Edit Account Settings page");
             Intent intent = new Intent(this, EditAccountSettingsScreen.class);
-            intent.putExtra("loggedInUser", currentUser);
+            intent.putExtra("currentUserEmail", currentUser.getEmail());
             startActivity(intent);
         });
     }

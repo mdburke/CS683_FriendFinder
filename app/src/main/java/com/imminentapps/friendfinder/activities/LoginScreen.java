@@ -48,7 +48,6 @@ public class LoginScreen extends AppCompatActivity implements LoaderCallbacks<Cu
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login_screen);
         db = DBUtil.getDBInstance();
-//        DBUtil.populateWithTestData();
 
         // Check to see if the user has saved their login information.
         // If so, we skip the rest of this method.
@@ -96,7 +95,7 @@ public class LoginScreen extends AppCompatActivity implements LoaderCallbacks<Cu
 
             // Skip the rest of the login screen and go to the home screen
             Intent intent = new Intent(this, HomeScreen.class);
-            intent.putExtra("email", preferences.getString("email", null));
+            intent.putExtra("currentUserEmail", preferences.getString("email", null));
             startActivity(intent);
         }
     }
@@ -213,7 +212,7 @@ public class LoginScreen extends AppCompatActivity implements LoaderCallbacks<Cu
         editor.apply();
 
         Intent intent = new Intent(this, HomeScreen.class);
-        intent.putExtra("email", mEmailView.getText());
+        intent.putExtra("currentUserEmail", mEmailView.getText());
         startActivity(intent);
     }
 
