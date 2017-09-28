@@ -38,8 +38,6 @@ public abstract class AppDatabase extends RoomDatabase {
                     .allowMainThreadQueries() // TODO: Remove this and use worker threads
                     .build();
 
-
-
             // Hack the relationship types in
             // TODO: Figure out the proper way to do this.
             RelationshipType[] relationshipTypes = new RelationshipType[3];
