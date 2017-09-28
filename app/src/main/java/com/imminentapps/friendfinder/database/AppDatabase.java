@@ -17,7 +17,7 @@ import com.imminentapps.friendfinder.domain.UserRelationship;
  * Created by mburke on 9/21/17.
  */
 @Database(entities = {User.class, UserRelationship.class, RelationshipType.class,
-        Profile.class, Hobby.class}, version = 9)
+        Profile.class, Hobby.class}, version = 11)
 public abstract class AppDatabase extends RoomDatabase {
     // Singleton instance
     private static AppDatabase INSTANCE;

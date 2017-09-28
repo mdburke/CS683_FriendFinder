@@ -41,6 +41,7 @@ public class EditProfileScreen extends AppCompatActivity {
         Intent intent = getIntent();
         currentUser = db.userDao().findByEmail((intent.getCharSequenceExtra("email").toString()));
 
+
         // TODO: Handle this case better
         if (currentUser == null) {
             throw new IllegalStateException("Edit Profile Screen was not able to locate the logged in user.");
@@ -48,6 +49,9 @@ public class EditProfileScreen extends AppCompatActivity {
         // TODO: Figure out how to get Room to pull the Profile info in with the previous Query
         Profile userProfile = db.profileDao().findById(currentUser.getId());
         currentUser.setProfile(userProfile);
+        int profileId = currentUser.getProfile().getProfileId();
+        List<Hobby> hobbyfromdb = db.hobbyDao().getHobbyByProfileId(profileId);
+        currentUser.getProfile().setHobbies(hobbyfromdb);
 
         // Initialize vars/fields
         TextView usernameView = findViewById(R.id.editprofile_usernameTextView);
@@ -58,8 +62,15 @@ public class EditProfileScreen extends AppCompatActivity {
 
         // Set text
         usernameView.setText(currentUser.getProfile().getUsername());
-        currentUser.getProfile().setAboutMeSection("This is the about me section\n");
-        aboutMeView.setText(currentUser.getProfile().getAboutMeSection());
+
+        if (currentUser.getProfile().getAboutMeSection() != null) {
+            aboutMeView.setText(currentUser.getProfile().getAboutMeSection());
+        }
+
+        List<Hobby> hobbies = currentUser.getProfile().getHobbies();
+        String hobbieString = hobbyListToText(hobbies).toString();
+
+        hobbyList.setText(hobbieString);
 
         // Add onClickListeners
         saveButton.setOnClickListener(view -> saveButtonClicked());

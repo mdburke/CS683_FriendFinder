@@ -71,6 +71,13 @@ public class Profile implements Serializable {
         return hobbies;
     }
 
+    public List<String> getHobbiesAsStrings() {
+        List<String> hobbiesString = new ArrayList<>();
+        for (Hobby hobby: hobbies) {
+            hobbiesString.add(hobby.getHobby());
+        }
+        return hobbiesString;
+    }
     public void setHobbies(List<Hobby> hobbies) {
         this.hobbies = hobbies;
     }

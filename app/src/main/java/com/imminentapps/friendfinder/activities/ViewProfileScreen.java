@@ -22,6 +22,8 @@ import com.imminentapps.friendfinder.domain.User;
 import java.io.FileInputStream;
 import java.util.ArrayList;
 
+import static com.imminentapps.friendfinder.utils.DBUtil.db;
+
 public class ViewProfileScreen extends AppCompatActivity implements GestureDetector.OnGestureListener {
     private final String TAG = this.getClass().getSimpleName();
     // Distance used to test for a valid swipe
@@ -69,8 +71,10 @@ public class ViewProfileScreen extends AppCompatActivity implements GestureDetec
             viewedProfile.setHobbies(new ArrayList<>());
         }
 
+        viewedProfile.setHobbies(db.hobbyDao().getHobbyByProfileId(viewedProfile.getProfileId()));
+
         // Setup the list adapter
-        ArrayAdapter adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, viewedProfile.getHobbies());
+        ArrayAdapter adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, viewedProfile.getHobbiesAsStrings());
         listView.setAdapter(adapter);
 
         // Get the profile image
