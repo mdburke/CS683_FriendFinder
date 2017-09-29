@@ -6,7 +6,7 @@
     android:layout_height="match_parent">
 
     <Button
-        android:id="@+id/search_button"
+        android:id="@+id/searchMenu_searchButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/search_button"
@@ -26,10 +26,10 @@
         android:layout_marginRight="16dp"
         android:layout_marginTop="8dp"
         android:entries="@string/about_me"
-        app:layout_constraintBottom_toBottomOf="@+id/search_button"
+        app:layout_constraintBottom_toBottomOf="@+id/searchMenu_searchButton"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/search_button"
+        app:layout_constraintTop_toTopOf="@+id/searchMenu_searchButton"
         app:layout_constraintVertical_bias="0.533"
-        app:layout_constraintLeft_toRightOf="@+id/search_button"
+        app:layout_constraintLeft_toRightOf="@+id/searchMenu_searchButton"
         android:layout_marginLeft="8dp" />
 </android.support.constraint.ConstraintLayout>

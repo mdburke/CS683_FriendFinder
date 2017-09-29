@@ -7,13 +7,17 @@ import android.util.Log;
 
 import com.imminentapps.friendfinder.R;
 import com.imminentapps.friendfinder.domain.User;
+import com.imminentapps.friendfinder.fragments.SearchMenuBarFragment;
 import com.imminentapps.friendfinder.fragments.SearchResultFragment;
 import com.imminentapps.friendfinder.utils.UserUtil;
 
 public class SearchScreen extends AppCompatActivity implements
-        SearchResultFragment.OnListFragmentInteractionListener {
+        SearchResultFragment.OnListFragmentInteractionListener,
+        SearchMenuBarFragment.SearchMenuBarListener {
+
     private final String TAG = this.getClass().getSimpleName();
     private User currentUser;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,5 +40,13 @@ public class SearchScreen extends AppCompatActivity implements
         intent.putExtra("currentUserEmail", user.getEmail());
         intent.putExtra("selectedUserEmail", currentUser.getEmail());
         startActivity(intent);
+    }
+
+    @Override
+    public void onSearchButtonClicked(String filter) {
+        SearchResultFragment searchResultFragment =
+                (SearchResultFragment) getSupportFragmentManager().findFragmentById(R.id.search_result_fragment);
+
+        searchResultFragment.filterSearchResults(filter);
     }
 }

@@ -14,8 +14,10 @@ import com.imminentapps.friendfinder.R;
 import com.imminentapps.friendfinder.adapters.UserSearchResultViewAdapter;
 import com.imminentapps.friendfinder.domain.Profile;
 import com.imminentapps.friendfinder.domain.User;
+import com.imminentapps.friendfinder.utils.Constants;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import static com.imminentapps.friendfinder.utils.DBUtil.db;
 
@@ -30,13 +32,15 @@ public class SearchResultFragment extends Fragment {
     private static final String ARG_COLUMN_COUNT = "column-count";
     private int mColumnCount = 1;
     private OnListFragmentInteractionListener mListener;
+    private List<User> searchResults;
+    private RecyclerView recyclerView;
+    private UserSearchResultViewAdapter searchResultViewAdapter;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
      */
-    public SearchResultFragment() {
-    }
+    public SearchResultFragment() {}
 
     @SuppressWarnings("unused")
     public static SearchResultFragment newInstance(int columnCount) {
@@ -54,32 +58,50 @@ public class SearchResultFragment extends Fragment {
         if (getArguments() != null) {
             mColumnCount = getArguments().getInt(ARG_COLUMN_COUNT);
         }
+
+        searchResults = new ArrayList<>();
+        searchResultViewAdapter = new UserSearchResultViewAdapter(getSearchResults(), mListener);
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_searchresult_list, container, false);
+        recyclerView = (RecyclerView) inflater.inflate(R.layout.fragment_searchresult_list, container, false);
 
         // Set the adapter
-        if (view instanceof RecyclerView) {
-            Context context = view.getContext();
-            RecyclerView recyclerView = (RecyclerView) view;
-            if (mColumnCount <= 1) {
-                recyclerView.setLayoutManager(new LinearLayoutManager(context));
-            } else {
-                recyclerView.setLayoutManager(new GridLayoutManager(context, mColumnCount));
-            }
-            // TODO: Figure out how to get this all in one transaction
-            ArrayList<User> list = new ArrayList<>();
-            list.addAll(db.userDao().getAll());
-            for (User user : list) {
-                Profile profile = db.profileDao().findById(user.getId());
-                user.setProfile(profile);
-            }
-            recyclerView.setAdapter(new UserSearchResultViewAdapter(list, mListener));
+        Context context = recyclerView.getContext();
+        if (mColumnCount <= 1) {
+            recyclerView.setLayoutManager(new LinearLayoutManager(context));
+        } else {
+            recyclerView.setLayoutManager(new GridLayoutManager(context, mColumnCount));
         }
-        return view;
+
+        recyclerView.setAdapter(searchResultViewAdapter);
+        return recyclerView;
+    }
+
+    private List<User> getSearchResults() {
+        // TODO: Switch to filtering in the DB Query
+        searchResults.addAll(db.userDao().getAll());
+        for (User user : searchResults) {
+            Profile profile = db.profileDao().findById(user.getId());
+            user.setProfile(profile);
+        }
+
+        return searchResults;
+    }
+
+    public void filterSearchResults(String filter) {
+        switch (filter) {
+            case Constants.SEARCH_FILTER_ALL_USERS:
+                break;
+            case Constants.SEARCH_FILTER_FRIENDS:
+                break;
+            case Constants.SEARCH_FILTER_NOT_FRIENDS:
+                searchResults.remove(0);
+                break;
+        }
+        searchResultViewAdapter.notifyDataSetChanged();
     }
 
 
