@@ -39,9 +39,6 @@ public class Profile implements Serializable {
     @ColumnInfo(name = "profile_image_uri")
     private String profileImageUri;
 
-    @ColumnInfo(name = "user_id")
-    private int userId;
-
     @Ignore
     private List<Hobby> hobbies;
 
@@ -128,14 +125,6 @@ public class Profile implements Serializable {
 
     public void setProfileId(int profileId) {
         this.profileId = profileId;
-    }
-
-    public int getUserId() {
-        return userId;
-    }
-
-    public void setUserId(int userId) {
-        this.userId = userId;
     }
 
     @Override

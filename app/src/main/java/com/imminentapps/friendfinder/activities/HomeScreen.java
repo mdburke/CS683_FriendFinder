@@ -98,7 +98,7 @@ public class HomeScreen extends AppCompatActivity {
         Button searchForFriendsButton = findViewById(R.id.buttonSearchForFriends);
         searchForFriendsButton.setOnClickListener((view) -> {
             Log.i(TAG, "Navigating to Search Page");
-            Intent intent = new Intent(this, SearchScreen.class);
+            Intent intent = new Intent(this, SearchForFriendsScreen.class);
             intent.putExtra("currentUserEmail", currentUser.getEmail());
             startActivity(intent);
         });

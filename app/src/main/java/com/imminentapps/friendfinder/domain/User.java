@@ -82,6 +82,9 @@ public class User implements Serializable {
     /******** Access Methods ********/
     // TODO: Figure out the right place for these and implementation. Probably should not be grabbing the database here.
     public boolean isFriendsWith(int friendId, Context context) {
+        if (this.id == friendId) { return false; }
+
+
         int firstId;
         int secondId;
 

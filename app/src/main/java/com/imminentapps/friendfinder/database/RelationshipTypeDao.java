@@ -26,7 +26,4 @@ public interface RelationshipTypeDao {
 
     @Delete
     void deleteTypes(RelationshipType... types);
-
-    @Query("DELETE FROM relationship_type")
-    void deleteAll();
 }

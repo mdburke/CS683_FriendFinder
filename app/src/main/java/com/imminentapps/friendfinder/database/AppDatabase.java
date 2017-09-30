@@ -17,7 +17,7 @@ import com.imminentapps.friendfinder.domain.UserRelationship;
  * Created by mburke on 9/21/17.
  */
 @Database(entities = {User.class, UserRelationship.class, RelationshipType.class,
-        Profile.class, Hobby.class}, version = 11)
+        Profile.class, Hobby.class}, version = 15)
 public abstract class AppDatabase extends RoomDatabase {
     // Singleton instance
     private static AppDatabase INSTANCE;
@@ -37,17 +37,6 @@ public abstract class AppDatabase extends RoomDatabase {
                     "user-database")
                     .allowMainThreadQueries() // TODO: Remove this and use worker threads
                     .build();
-
-            // Hack the relationship types in
-            // TODO: Figure out the proper way to do this.
-            RelationshipType[] relationshipTypes = new RelationshipType[3];
-            relationshipTypes[0] = new RelationshipType(1, "pending_first_second");
-            relationshipTypes[1] = new RelationshipType(2, "pending_second_first");
-            relationshipTypes[2] = new RelationshipType(3, "friends");
-
-            INSTANCE.relationshipTypeDao().deleteAll();
-            INSTANCE.relationshipTypeDao().addTypes(relationshipTypes);
-
         }
         return INSTANCE;
     }
