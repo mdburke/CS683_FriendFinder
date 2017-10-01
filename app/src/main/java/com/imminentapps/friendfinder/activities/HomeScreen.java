@@ -120,5 +120,14 @@ public class HomeScreen extends AppCompatActivity {
             intent.putExtra("currentUserEmail", currentUser.getEmail());
             startActivity(intent);
         });
+
+        // Initialize Create Event button
+        Button createEventButton = findViewById(R.id.buttonCreateEvent);
+        createEventButton.setOnClickListener((view) -> {
+            Log.i(TAG, "Navigating to Create Event page");
+            Intent intent = new Intent(this, CreateEventScreen.class);
+            intent.putExtra("currentUserEmail", currentUser.getEmail());
+            startActivity(intent);
+        });
     }
 }

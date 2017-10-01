@@ -34,7 +34,8 @@
         <activity android:name=".activities.EditProfileScreen" />
         <activity android:name=".activities.EditAccountSettingsScreen" />
         <activity android:name=".activities.CreateAccountScreen" />
-        <activity android:name=".activities.SearchForFriendsScreen"></activity>
+        <activity android:name=".activities.SearchForFriendsScreen" />
+        <activity android:name=".activities.CreateEventScreen"></activity>
     </application>
 
 </manifest>

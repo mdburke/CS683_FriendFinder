@@ -49,6 +49,12 @@
             android:layout_height="wrap_content"
             android:text="@string/button_edit_account_settings" />
 
+        <Button
+            android:id="@+id/buttonCreateEvent"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/create_new_event" />
+
     </LinearLayout>
 
 </android.support.constraint.ConstraintLayout>

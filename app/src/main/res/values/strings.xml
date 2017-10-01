@@ -37,4 +37,10 @@
     <string name="user_profile_image">User Profile Image</string>
     <string name="friend_star">Friend Star</string>
     <string name="stay_logged_in_for_1_day">Stay Logged In For 1 Day</string>
+    <string name="create_new_event">Create New Event</string>
+    <string name="create_event">Create Event</string>
+    <string name="event_location">Event Location</string>
+    <string name="event_name">Event Name</string>
+    <string name="save_event">Save Event</string>
+    <string name="event_date">Event Date</string>
 </resources>
