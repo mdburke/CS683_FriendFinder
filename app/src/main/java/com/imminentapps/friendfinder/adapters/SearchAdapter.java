@@ -16,21 +16,22 @@ import com.imminentapps.friendfinder.utils.UserUtil;
 import java.util.List;
 
 /**
+ * Custom Adapter class for the Search Screen data
  * Created by mburke on 9/30/17.
  */
 public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.SearchItemViewHolder> {
 
     List<User> users;
     Context context;
-    boolean onClickReceived = false;
-    UpdateMainClass updateMainClass;
+    // Use this to access the activity
+    ActivityCommunication activityCommunication;
 
     public SearchAdapter(Context context, List<User> users) {
         this.context = context;
         this.users = users;
 
-        if (context instanceof UpdateMainClass) {
-            updateMainClass = (UpdateMainClass) context;
+        if (context instanceof ActivityCommunication) {
+            activityCommunication = (ActivityCommunication) context;
         }
     }
 
@@ -42,13 +43,26 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.SearchItem
         return new SearchItemViewHolder(view);
     }
 
+    /**
+     * Setup each CardView for the RecyclerView list
+     *
+     * @param holder
+     * @param position
+     */
     @Override
     public void onBindViewHolder(final SearchItemViewHolder holder, int position) {
+        // Grab the user
         User user = UserUtil.loadUser(users.get(position).getEmail());
+
+        // Set the fields
         holder.username.setText(user.getProfile().getUsername());
         holder.email.setText(user.getEmail());
-        holder.cardView.setOnClickListener(view -> updateMainClass.userClicked(user.getEmail()));
-        if (!updateMainClass.getCurrentUser().isFriendsWith(user.getId(), context)) {
+
+        // Add the onClickListener
+        holder.cardView.setOnClickListener(view -> activityCommunication.userClicked(user.getEmail()));
+
+        // If user is not a friend to the current user, make the friend icon invisible
+        if (!activityCommunication.getCurrentUser().isFriendsWith(user.getId(), context)) {
             holder.friendIcon.setVisibility(View.INVISIBLE);
         }
     }
@@ -58,6 +72,9 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.SearchItem
         return users.size();
     }
 
+    /**
+     * Custom ViewHolder class for the RecyclerView
+     */
     public class SearchItemViewHolder  extends RecyclerView.ViewHolder {
         private TextView username;
         private TextView email;
@@ -73,7 +90,10 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.SearchItem
         }
     }
 
-    public interface UpdateMainClass {
+    /**
+     * Interface for communicating with the activity
+     */
+    public interface ActivityCommunication {
         void userClicked(String email);
         User getCurrentUser();
     }

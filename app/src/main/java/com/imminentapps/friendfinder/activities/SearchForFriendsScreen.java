@@ -14,8 +14,6 @@ import android.widget.Spinner;
 import com.imminentapps.friendfinder.R;
 import com.imminentapps.friendfinder.adapters.SearchAdapter;
 import com.imminentapps.friendfinder.database.AppDatabase;
-import com.imminentapps.friendfinder.domain.Hobby;
-import com.imminentapps.friendfinder.domain.Profile;
 import com.imminentapps.friendfinder.domain.User;
 import com.imminentapps.friendfinder.utils.Constants;
 import com.imminentapps.friendfinder.utils.DBUtil;
@@ -28,7 +26,7 @@ import java.util.stream.Collectors;
 /**
  *  Adapted from http://blog.inapptext.com/recyclerview-creating-dynamic-lists-and-grids-in-android-1/
  */
-public class SearchForFriendsScreen extends AppCompatActivity implements  SearchAdapter.UpdateMainClass {
+public class SearchForFriendsScreen extends AppCompatActivity implements SearchAdapter.ActivityCommunication {
     private final String TAG = this.getClass().getSimpleName();
     private AppDatabase db;
     private RecyclerView recyclerView;
@@ -46,7 +44,7 @@ public class SearchForFriendsScreen extends AppCompatActivity implements  Search
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search_for_friends_screen);
 
-        // Set views
+        // Initialize views
         recyclerView = findViewById(R.id.recycler_view);
         filterButton = findViewById(R.id.search_filterbutton);
         filterButton.setOnClickListener(view -> filterButtonClicked());
@@ -62,64 +60,14 @@ public class SearchForFriendsScreen extends AppCompatActivity implements  Search
             throw new IllegalStateException("Edit Profile Screen was not able to locate the logged in user.");
         }
 
+        // Setup user lists
+        initializeUserLists();
+
         // Setup spinner
-        List<String> choiceList = new ArrayList<>();
-        choiceList.add(Constants.SEARCH_FILTER_ALL_USERS);
-        choiceList.add(Constants.SEARCH_FILTER_FRIENDS);
-        choiceList.add(Constants.SEARCH_FILTER_NOT_FRIENDS);
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, choiceList);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        friendSpinner.setAdapter(adapter);
+        initializeSpinner();
 
         // Setup RecyclerView
-        layoutManager = new LinearLayoutManager(this);
-        recyclerView.setLayoutManager(layoutManager);
-        recyclerView.setItemAnimator(new DefaultItemAnimator());
-
-
-        //**** TODO: Fix super inefficient algorithm *******//
-
-        // Set initial allUsers in list
-        allUsers = new ArrayList<>();
-        allUsers.addAll(db.userDao().getAll());
-        allUsers.remove(currentUser);
-        for (User user : allUsers) {
-            Profile profile = db.profileDao().findById(user.getId());
-            List<Hobby> hobbies = db.hobbyDao().getHobbyByProfileId(profile.getProfileId());
-            profile.setHobbies(hobbies);
-            user.setProfile(profile);
-        }
-
-        // Set up friends list
-        friends = new ArrayList<>();
-        friends.addAll(db.userDao().getAll());
-        friends.remove(currentUser);
-        friends = friends.stream()
-                .filter(user -> user.isFriendsWith(currentUser.getId(), this))
-                .collect(Collectors.toList());
-        for (User user : friends) {
-            Profile profile = db.profileDao().findById(user.getId());
-            List<Hobby> hobbies = db.hobbyDao().getHobbyByProfileId(profile.getProfileId());
-            profile.setHobbies(hobbies);
-            user.setProfile(profile);
-        }
-
-        // Set up not friends list
-        notFriends = new ArrayList<>();
-        notFriends.addAll(db.userDao().getAll());
-        notFriends.remove(currentUser);
-        notFriends = notFriends.stream()
-                .filter(user -> !user.isFriendsWith(currentUser.getId(), this))
-                .collect(Collectors.toList());
-        for (User user : notFriends) {
-            Profile profile = db.profileDao().findById(user.getId());
-            List<Hobby> hobbies = db.hobbyDao().getHobbyByProfileId(profile.getProfileId());
-            profile.setHobbies(hobbies);
-            user.setProfile(profile);
-        }
-
-        searchAdapter = new SearchAdapter(this, allUsers);
-        recyclerView.setAdapter(searchAdapter);
+        initializeRecyclerView();
     }
 
     // This logic needs a lot of work and is very inefficient
@@ -129,7 +77,6 @@ public class SearchForFriendsScreen extends AppCompatActivity implements  Search
 
         switch (filter) {
             case Constants.SEARCH_FILTER_ALL_USERS:
-
                 searchAdapter = new SearchAdapter(this, allUsers);
                 recyclerView.setAdapter(searchAdapter);
                 searchAdapter.notifyDataSetChanged();
@@ -146,6 +93,71 @@ public class SearchForFriendsScreen extends AppCompatActivity implements  Search
                 break;
         }
     }
+
+    /**
+     * Sets up the RecyclerView
+     */
+    private void initializeRecyclerView() {
+        layoutManager = new LinearLayoutManager(this);
+        recyclerView.setLayoutManager(layoutManager);
+        recyclerView.setItemAnimator(new DefaultItemAnimator());
+        searchAdapter = new SearchAdapter(this, allUsers);
+        recyclerView.setAdapter(searchAdapter);
+    }
+
+    /**
+     * Sets up the spinner
+     */
+    private void initializeSpinner() {
+        List<String> choiceList = new ArrayList<>();
+        choiceList.add(Constants.SEARCH_FILTER_ALL_USERS);
+        choiceList.add(Constants.SEARCH_FILTER_FRIENDS);
+        choiceList.add(Constants.SEARCH_FILTER_NOT_FRIENDS);
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, choiceList);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        friendSpinner.setAdapter(adapter);
+    }
+
+    /**
+     * Initializes the user lists that are used in place of a true "search" algorithm
+     * This definitely needs to be fixed eventually.
+     * TODO: Create a true search/filter algorithm
+     */
+    private void initializeUserLists() {
+        // Set initial allUsers in list
+        allUsers = new ArrayList<>();
+        allUsers.addAll(db.userDao().getAll());
+        allUsers.remove(currentUser);
+        for (User user : allUsers) {
+            UserUtil.loadUser(user.getEmail());
+        }
+
+        // Set up friends list
+        friends = new ArrayList<>();
+        friends.addAll(db.userDao().getAll());
+        friends.remove(currentUser);
+        // Filter out anyone who isn't friends with current user
+        friends = friends.stream()
+                .filter(user -> user.isFriendsWith(currentUser.getId(), this))
+                .collect(Collectors.toList());
+        for (User user : friends) {
+            UserUtil.loadUser(user.getEmail());
+        }
+
+        // Set up not friends list
+        notFriends = new ArrayList<>();
+        notFriends.addAll(db.userDao().getAll());
+        notFriends.remove(currentUser);
+        // Filter out anyone who is friends with current user
+        notFriends = notFriends.stream()
+                .filter(user -> !user.isFriendsWith(currentUser.getId(), this))
+                .collect(Collectors.toList());
+        for (User user : notFriends) {
+            UserUtil.loadUser(user.getEmail());
+        }
+    }
+
+    //***** ActivityCommunication interface methods ******//
 
     @Override
     public void userClicked(String email) {
