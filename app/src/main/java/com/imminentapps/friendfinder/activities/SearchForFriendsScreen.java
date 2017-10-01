@@ -15,6 +15,7 @@ import com.imminentapps.friendfinder.R;
 import com.imminentapps.friendfinder.adapters.SearchAdapter;
 import com.imminentapps.friendfinder.database.AppDatabase;
 import com.imminentapps.friendfinder.domain.User;
+import com.imminentapps.friendfinder.interfaces.ActivityCommunication;
 import com.imminentapps.friendfinder.utils.Constants;
 import com.imminentapps.friendfinder.utils.DBUtil;
 import com.imminentapps.friendfinder.utils.UserUtil;
@@ -26,7 +27,7 @@ import java.util.stream.Collectors;
 /**
  *  Adapted from http://blog.inapptext.com/recyclerview-creating-dynamic-lists-and-grids-in-android-1/
  */
-public class SearchForFriendsScreen extends AppCompatActivity implements SearchAdapter.ActivityCommunication {
+public class SearchForFriendsScreen extends AppCompatActivity implements ActivityCommunication {
     private final String TAG = this.getClass().getSimpleName();
     private AppDatabase db;
     private RecyclerView recyclerView;

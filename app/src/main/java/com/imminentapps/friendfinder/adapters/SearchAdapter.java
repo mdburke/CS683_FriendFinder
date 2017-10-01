@@ -11,6 +11,7 @@ import android.widget.TextView;
 
 import com.imminentapps.friendfinder.R;
 import com.imminentapps.friendfinder.domain.User;
+import com.imminentapps.friendfinder.interfaces.ActivityCommunication;
 import com.imminentapps.friendfinder.utils.UserUtil;
 
 import java.util.List;
@@ -88,13 +89,5 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.SearchItem
             cardView = itemView.findViewById(R.id.card_holder);
             friendIcon = itemView.findViewById(R.id.searchScreen_friendIcon);
         }
-    }
-
-    /**
-     * Interface for communicating with the activity
-     */
-    public interface ActivityCommunication {
-        void userClicked(String email);
-        User getCurrentUser();
     }
 }

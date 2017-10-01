@@ -7,6 +7,9 @@ import android.widget.DatePicker;
 import android.widget.TextView;
 
 import com.imminentapps.friendfinder.R;
+import com.imminentapps.friendfinder.database.AppDatabase;
+import com.imminentapps.friendfinder.domain.Event;
+import com.imminentapps.friendfinder.utils.DBUtil;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -16,11 +19,13 @@ public class CreateEventScreen extends AppCompatActivity {
     private TextView eventLocation;
     private DatePicker eventDate;
     private Button saveButton;
+    private AppDatabase db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_event_screen);
+        db = DBUtil.getDBInstance();
 
         // Initialize views
         eventTitle = findViewById(R.id.eventName_EditText);
@@ -34,5 +39,8 @@ public class CreateEventScreen extends AppCompatActivity {
         Calendar calendar = Calendar.getInstance();
         calendar.set(eventDate.getYear(), eventDate.getMonth(), eventDate.getDayOfMonth());
         Date date = calendar.getTime();
+
+        Event event = new Event(eventTitle.getText().toString(), "", eventLocation.getText().toString(), date);
+        db.eventDao().insert(event);
     }
 }

@@ -129,5 +129,14 @@ public class HomeScreen extends AppCompatActivity {
             intent.putExtra("currentUserEmail", currentUser.getEmail());
             startActivity(intent);
         });
+
+        // Initialize Search for Events button
+        Button searchForEventsButton = findViewById(R.id.buttonSearchForEvents);
+        searchForEventsButton.setOnClickListener((view) -> {
+            Log.i(TAG, "Navigating to Search For Events page");
+            Intent intent = new Intent(this, SearchForEventsScreen.class);
+            intent.putExtra("currentUserEmail", currentUser.getEmail());
+            startActivity(intent);
+        });
     }
 }

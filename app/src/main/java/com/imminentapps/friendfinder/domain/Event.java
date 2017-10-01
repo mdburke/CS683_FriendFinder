@@ -1,6 +1,7 @@
 package com.imminentapps.friendfinder.domain;
 
 import android.arch.persistence.room.ColumnInfo;
+import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.PrimaryKey;
 
 import java.util.Date;
@@ -8,6 +9,7 @@ import java.util.Date;
 /**
  * Created by mburke on 9/30/17.
  */
+@Entity
 public class Event {
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "event_id")

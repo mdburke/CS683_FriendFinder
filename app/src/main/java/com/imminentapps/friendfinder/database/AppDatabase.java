@@ -6,6 +6,7 @@ import android.arch.persistence.room.RoomDatabase;
 import android.arch.persistence.room.TypeConverters;
 import android.content.Context;
 
+import com.imminentapps.friendfinder.domain.Event;
 import com.imminentapps.friendfinder.domain.Hobby;
 import com.imminentapps.friendfinder.domain.Profile;
 import com.imminentapps.friendfinder.domain.RelationshipType;
@@ -17,8 +18,8 @@ import com.imminentapps.friendfinder.domain.UserRelationship;
  *
  * Created by mburke on 9/21/17.
  */
-@Database(entities = {User.class, UserRelationship.class, RelationshipType.class,
-        Profile.class, Hobby.class}, version = 15)
+@Database(entities = {User.class, Event.class, UserRelationship.class, RelationshipType.class,
+        Profile.class, Hobby.class}, version = 16)
 @TypeConverters({Converters.class})
 public abstract class AppDatabase extends RoomDatabase {
     // Singleton instance
