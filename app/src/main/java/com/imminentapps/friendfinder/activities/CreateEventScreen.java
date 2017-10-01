@@ -2,7 +2,6 @@ package com.imminentapps.friendfinder.activities;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.TextView;
@@ -35,6 +34,5 @@ public class CreateEventScreen extends AppCompatActivity {
         Calendar calendar = Calendar.getInstance();
         calendar.set(eventDate.getYear(), eventDate.getMonth(), eventDate.getDayOfMonth());
         Date date = calendar.getTime();
-        Log.i("tag", date.toString());
     }
 }
