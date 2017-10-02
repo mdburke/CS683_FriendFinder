@@ -16,14 +16,17 @@ import com.imminentapps.friendfinder.utils.EventUtil;
 import java.util.List;
 
 /**
+ * Custom RecyclerView Adapter class for the SearchForFriendsScreen. It converts
+ * a List of Events into the RecyclerView.
+ *
  * Created by mburke on 10/1/17.
  */
-
 public class SearchForEventsAdapter extends RecyclerView.Adapter<SearchForEventsAdapter.EventsViewHolder>  {
 
+    // Object used for communicating back to the parent activity. See interface for details.
+    ActivityCommunication activityCommunication;
     List<Event> events;
     Context context;
-    ActivityCommunication activityCommunication;
 
     public SearchForEventsAdapter(List<Event> events, Context context) {
         this.events = events;
@@ -36,16 +39,17 @@ public class SearchForEventsAdapter extends RecyclerView.Adapter<SearchForEvents
 
     @Override
     public EventsViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        // create a new view
-        View view = LayoutInflater.from(context).inflate(R.layout.custom_seach_for_friends_layout, parent, false);
-
+        // Create a new view and return it
+        View view = LayoutInflater.from(context).inflate(R.layout.custom_seach_for_events_layout, parent, false);
         return new EventsViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(SearchForEventsAdapter.EventsViewHolder holder, int position) {
+        // Grab the event data from the database
         Event event = EventUtil.loadEvent(events.get(position).getEventId());
 
+        // Set the fields of the CardView in the RecyclerView
         holder.date.setText(event.getDate().toString());
         holder.title.setText(event.getTitle());
 

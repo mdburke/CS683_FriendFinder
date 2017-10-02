@@ -9,7 +9,6 @@ import android.content.Context;
 import com.imminentapps.friendfinder.domain.Event;
 import com.imminentapps.friendfinder.domain.Hobby;
 import com.imminentapps.friendfinder.domain.Profile;
-import com.imminentapps.friendfinder.domain.RelationshipType;
 import com.imminentapps.friendfinder.domain.User;
 import com.imminentapps.friendfinder.domain.UserRelationship;
 
@@ -18,8 +17,8 @@ import com.imminentapps.friendfinder.domain.UserRelationship;
  *
  * Created by mburke on 9/21/17.
  */
-@Database(entities = {User.class, Event.class, UserRelationship.class, RelationshipType.class,
-        Profile.class, Hobby.class}, version = 16)
+@Database(entities = {User.class, Event.class, UserRelationship.class, //RelationshipType.class,
+        Profile.class, Hobby.class}, version = 17)
 @TypeConverters({Converters.class})
 public abstract class AppDatabase extends RoomDatabase {
     // Singleton instance
@@ -28,7 +27,7 @@ public abstract class AppDatabase extends RoomDatabase {
     // Declare DAO objects
     public abstract UserDao userDao();
     public abstract ProfileDao profileDao();
-    public abstract RelationshipTypeDao relationshipTypeDao();
+//    public abstract RelationshipTypeDao relationshipTypeDao();
     public abstract UserRelationshipDao userRelationshipDao();
     public abstract HobbyDao hobbyDao();
     public abstract EventDao eventDao();

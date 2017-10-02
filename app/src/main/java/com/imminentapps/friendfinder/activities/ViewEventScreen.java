@@ -58,7 +58,6 @@ public class ViewEventScreen extends AppCompatActivity {
         calendar.add(Calendar.HOUR, 1);
         Date endTime = calendar.getTime();
 
-
         Intent intent = new Intent()
                 .setAction(Intent.ACTION_INSERT)
                 .setData(CalendarContract.Events.CONTENT_URI)

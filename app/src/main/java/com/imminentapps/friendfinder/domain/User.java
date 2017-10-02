@@ -84,7 +84,6 @@ public class User implements Serializable {
     public boolean isFriendsWith(int friendId, Context context) {
         if (this.id == friendId) { return false; }
 
-
         int firstId;
         int secondId;
 
