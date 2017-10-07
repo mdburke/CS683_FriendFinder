@@ -3,7 +3,6 @@ package com.imminentapps.friendfinder.activities;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -39,6 +38,10 @@ public class CreateAccountScreen extends AppCompatActivity {
     private TextView lastNameView;
     private Button createAccountButton;
     private String profileImageUri;
+
+    // Instance vars
+    private boolean isValidEmail;
+    private boolean isValidUsername;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -98,38 +101,6 @@ public class CreateAccountScreen extends AppCompatActivity {
         task.execute(newUser);
     }
 
-    private class InsertUserTask extends AsyncTask<User, Integer, Void> {
-        private Context mContext;
-
-        protected InsertUserTask(Context mContext) {
-            this.mContext = mContext;
-        }
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            // Navigate to the HomeScreen as if the user has just logged in
-            Intent intent = new Intent(mContext, HomeScreen.class);
-            intent.putExtra("currentUserEmail", emailView.getText());
-            startActivity(intent);
-        }
-
-        // TODO: Add some kind of progress update in case this is a long running query.
-        @Override
-        protected void onProgressUpdate(Integer... values) {
-            super.onProgressUpdate(values);
-        }
-
-        @Override
-        // TODO: Make this work with more than one user
-        protected Void doInBackground(User... users) {
-            // Add the user to the Database
-            // TODO: Figure out how to do this all in one transaction
-            db.userDao().insertUsers(users[0]);
-            db.profileDao().insert(users[0].getProfile());
-            return null;
-        }
-    }
-
     /**
      * Method checks if email has an '@' symbol and also checks if the email is already
      * in the database.
@@ -138,12 +109,23 @@ public class CreateAccountScreen extends AppCompatActivity {
      */
     private boolean validateEmail() {
         String email = emailView.getText().toString();
-        if (!email.contains("@") || (db.userDao().findByEmail(email) != null)) {
-            emailView.setError("Invalid email address!");
-            emailView.requestFocus();
-            return false;
-        }
-        return true;
+        DatabaseTask<String, Boolean> task = new DatabaseTask<>(new DatabaseTask.DatabaseTaskListener<Boolean>() {
+            @Override
+            public void onFinished(Boolean result) {
+                if (!email.contains("@") || result) {
+                    emailView.setError("Invalid email address!");
+                    emailView.requestFocus();
+                }
+                isValidEmail = result;
+            }
+        }, new DatabaseTask.DatabaseTaskQuery<String, Boolean>() {
+            @Override
+            public Boolean execute(String... emails) {
+                return db.userDao().findByEmail(emails[0]) != null;
+            }
+        });
+        task.execute(email);
+        return isValidEmail;
     }
 
     /**
@@ -166,12 +148,24 @@ public class CreateAccountScreen extends AppCompatActivity {
      */
     private boolean validateUsername() {
         String username = usernameView.getText().toString();
-        if (username.length() < 5 || (db.profileDao().findByUsername(username) != null)) {
-            usernameView.setError("Invalid username!");
-            usernameView.requestFocus();
-            return false;
-        }
-        return true;
+
+        DatabaseTask<String, Boolean> task = new DatabaseTask<>(new DatabaseTask.DatabaseTaskListener<Boolean>() {
+            @Override
+            public void onFinished(Boolean result) {
+                if (username.length() < 5 || result) {
+                    usernameView.setError("Invalid username!");
+                    usernameView.requestFocus();
+                }
+                isValidUsername = result;
+            }
+        }, new DatabaseTask.DatabaseTaskQuery<String, Boolean>() {
+            @Override
+            public Boolean execute(String... emails) {
+                return db.profileDao().findByUsername(username) != null;
+            }
+        });
+        task.execute(username);
+        return isValidUsername;
     }
 
     /**
