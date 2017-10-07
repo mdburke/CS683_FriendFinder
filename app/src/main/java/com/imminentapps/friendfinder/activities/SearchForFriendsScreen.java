@@ -13,23 +13,23 @@ import android.widget.Spinner;
 
 import com.imminentapps.friendfinder.R;
 import com.imminentapps.friendfinder.adapters.SearchAdapter;
-import com.imminentapps.friendfinder.database.AppDatabase;
+import com.imminentapps.friendfinder.database.DatabaseTask;
 import com.imminentapps.friendfinder.domain.User;
 import com.imminentapps.friendfinder.interfaces.ActivityCommunication;
 import com.imminentapps.friendfinder.utils.Constants;
-import com.imminentapps.friendfinder.utils.DBUtil;
 import com.imminentapps.friendfinder.utils.UserUtil;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.imminentapps.friendfinder.utils.DBUtil.db;
+
 /**
  *  Adapted from http://blog.inapptext.com/recyclerview-creating-dynamic-lists-and-grids-in-android-1/
  */
 public class SearchForFriendsScreen extends AppCompatActivity implements ActivityCommunication {
     private final String TAG = this.getClass().getSimpleName();
-    private AppDatabase db;
     private RecyclerView recyclerView;
     private SearchAdapter searchAdapter;
     private List<User> allUsers;
@@ -50,25 +50,36 @@ public class SearchForFriendsScreen extends AppCompatActivity implements Activit
         filterButton = findViewById(R.id.search_filterbutton);
         filterButton.setOnClickListener(view -> filterButtonClicked());
         friendSpinner = findViewById(R.id.search_spinner);
-        db = DBUtil.getDBInstance();
 
         // Setup user
+        initializeUserData();
+    }
+
+    private void initializeUserData() {
+        // Grab the user information from the database based on the email passed in
         Intent intent = getIntent();
-        currentUser = UserUtil.loadUser(intent.getCharSequenceExtra("currentUserEmail").toString());
+        String email = intent.getCharSequenceExtra("currentUserEmail").toString();
 
-        // TODO: Handle this case better
-        if (currentUser == null) {
-            throw new IllegalStateException("Edit Profile Screen was not able to locate the logged in user.");
-        }
+        DatabaseTask<String, User> task = new DatabaseTask<>(new DatabaseTask.DatabaseTaskListener<User>() {
+            @Override
+            public void onFinished(User user) {
+                // TODO: Handle this case better
+                if (user == null) {
+                    throw new IllegalStateException("HomeScreen was not able to locate the logged in user.");
+                }
+                currentUser = user;
 
-        // Setup user lists
-        initializeUserLists();
+                // Setup user lists
+                initializeUserLists();
+            }
+        }, new DatabaseTask.DatabaseTaskQuery<String, User>() {
+            @Override
+            public User execute(String... emails) {
+                return UserUtil.loadUser(emails[0]);
+            }
+        });
 
-        // Setup spinner
-        initializeSpinner();
-
-        // Setup RecyclerView
-        initializeRecyclerView();
+        task.execute(email);
     }
 
     // This logic needs a lot of work and is very inefficient
@@ -125,37 +136,56 @@ public class SearchForFriendsScreen extends AppCompatActivity implements Activit
      * TODO: Create a true search/filter algorithm
      */
     private void initializeUserLists() {
-        // Set initial allUsers in list
-        allUsers = new ArrayList<>();
-        allUsers.addAll(db.userDao().getAll());
-        allUsers.remove(currentUser);
-        for (User user : allUsers) {
-            UserUtil.loadUser(user.getEmail());
-        }
 
-        // Set up friends list
-        friends = new ArrayList<>();
-        friends.addAll(db.userDao().getAll());
-        friends.remove(currentUser);
-        // Filter out anyone who isn't friends with current user
-        friends = friends.stream()
-                .filter(user -> user.isFriendsWith(currentUser.getId(), this))
-                .collect(Collectors.toList());
-        for (User user : friends) {
-            UserUtil.loadUser(user.getEmail());
-        }
+        DatabaseTask<Void, Void> task = new DatabaseTask<>(new DatabaseTask.DatabaseTaskListener() {
+            @Override
+            public void onFinished(Object result) {
+                // Setup spinner
+                initializeSpinner();
 
-        // Set up not friends list
-        notFriends = new ArrayList<>();
-        notFriends.addAll(db.userDao().getAll());
-        notFriends.remove(currentUser);
-        // Filter out anyone who is friends with current user
-        notFriends = notFriends.stream()
-                .filter(user -> !user.isFriendsWith(currentUser.getId(), this))
-                .collect(Collectors.toList());
-        for (User user : notFriends) {
-            UserUtil.loadUser(user.getEmail());
-        }
+                // Setup RecyclerView
+                initializeRecyclerView();
+            }
+        }, new DatabaseTask.DatabaseTaskQuery() {
+            @Override
+            public Object execute(Object[] params) {
+                // Set initial allUsers in list
+                allUsers = new ArrayList<>();
+                allUsers.addAll(db.userDao().getAll());
+                allUsers.remove(currentUser);
+                for (User user : allUsers) {
+                    UserUtil.loadUser(user.getEmail());
+                }
+
+                // Set up friends list
+                friends = new ArrayList<>();
+                friends.addAll(db.userDao().getAll());
+                friends.remove(currentUser);
+                // Filter out anyone who isn't friends with current user
+                friends = friends.stream()
+                        .filter(user -> user.isFriendsWith(currentUser.getId(), getApplicationContext()))
+                        .collect(Collectors.toList());
+                for (User user : friends) {
+                    UserUtil.loadUser(user.getEmail());
+                }
+
+                // Set up not friends list
+                notFriends = new ArrayList<>();
+                notFriends.addAll(db.userDao().getAll());
+                notFriends.remove(currentUser);
+                // Filter out anyone who is friends with current user
+                notFriends = notFriends.stream()
+                        .filter(user -> !user.isFriendsWith(currentUser.getId(), getApplicationContext()))
+                        .collect(Collectors.toList());
+                for (User user : notFriends) {
+                    UserUtil.loadUser(user.getEmail());
+                }
+                return null;
+            }
+        });
+
+        task.execute();
+
     }
 
     //***** ActivityCommunication interface methods ******//

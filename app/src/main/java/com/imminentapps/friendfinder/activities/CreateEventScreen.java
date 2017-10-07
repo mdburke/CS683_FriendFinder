@@ -8,6 +8,7 @@ import android.widget.TextView;
 
 import com.imminentapps.friendfinder.R;
 import com.imminentapps.friendfinder.database.AppDatabase;
+import com.imminentapps.friendfinder.database.DatabaseTask;
 import com.imminentapps.friendfinder.domain.Event;
 import com.imminentapps.friendfinder.utils.DBUtil;
 
@@ -41,6 +42,20 @@ public class CreateEventScreen extends AppCompatActivity {
         Date date = calendar.getTime();
 
         Event event = new Event(eventTitle.getText().toString(), "", eventLocation.getText().toString(), date);
-        db.eventDao().insert(event);
+
+        DatabaseTask<Event, Void> task = new DatabaseTask<>(new DatabaseTask.DatabaseTaskListener<Void>() {
+            @Override
+            public void onFinished(Void result) {
+
+            }
+        }, new DatabaseTask.DatabaseTaskQuery<Event, Void>() {
+            @Override
+            public Void execute(Event... events) {
+                db.eventDao().insert(events[0]);
+                return null;
+            }
+        });
+
+        task.execute(event);
     }
 }

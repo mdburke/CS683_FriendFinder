@@ -13,6 +13,7 @@ import android.widget.TextView;
 
 import com.imminentapps.friendfinder.R;
 import com.imminentapps.friendfinder.database.AppDatabase;
+import com.imminentapps.friendfinder.database.DatabaseTask;
 import com.imminentapps.friendfinder.domain.Hobby;
 import com.imminentapps.friendfinder.domain.Profile;
 import com.imminentapps.friendfinder.domain.User;
@@ -41,13 +42,6 @@ public class EditProfileScreen extends AppCompatActivity {
         setContentView(R.layout.activity_edit_profile_screen);
         db = DBUtil.getDBInstance();
 
-        Intent intent = getIntent();
-        currentUser = UserUtil.loadUser(intent.getCharSequenceExtra("currentUserEmail").toString());
-
-        // TODO: Handle this case better
-        if (currentUser == null) {
-            throw new IllegalStateException("Edit Profile Screen was not able to locate the logged in user.");
-        }
 
         // Initialize vars/fields
         usernameView = findViewById(R.id.editprofile_usernameTextView);
@@ -56,14 +50,39 @@ public class EditProfileScreen extends AppCompatActivity {
         hobbyList = findViewById(R.id.editprofile_hobbyList);
         saveButton = findViewById(R.id.editprofile_saveButton);
 
-        // Set the views with the user data
-        usernameView.setText(currentUser.getProfile().getUsername());
-        aboutMeView.setText(getAboutMeText(currentUser));
-        hobbyList.setText(getHobbyListText(currentUser));
-        setupProfileImage();
-
         // Add onClickListeners
         saveButton.setOnClickListener(view -> saveButtonClicked());
+
+        initializeUserData();
+    }
+
+    private void initializeUserData() {
+        // Grab the user information from the database based on the email passed in
+        Intent intent = getIntent();
+        String email = intent.getCharSequenceExtra("currentUserEmail").toString();
+
+        DatabaseTask<String, User> task = new DatabaseTask<>(new DatabaseTask.DatabaseTaskListener<User>() {
+            @Override
+            public void onFinished(User user) {
+                // TODO: Handle this case better
+                if (user == null) {
+                    throw new IllegalStateException("HomeScreen was not able to locate the logged in user.");
+                }
+                currentUser = user;
+                // Set the views with the user data
+                usernameView.setText(currentUser.getProfile().getUsername());
+                aboutMeView.setText(getAboutMeText(currentUser));
+                hobbyList.setText(getHobbyListText(currentUser));
+                setupProfileImage();
+            }
+        }, new DatabaseTask.DatabaseTaskQuery<String, User>() {
+            @Override
+            public User execute(String... emails) {
+                return UserUtil.loadUser(emails[0]);
+            }
+        });
+
+        task.execute(email);
     }
 
     private void saveButtonClicked() {
@@ -74,9 +93,22 @@ public class EditProfileScreen extends AppCompatActivity {
         Profile profile = currentUser.getProfile();
         profile.setAboutMeSection(aboutMe);
 
-        // Save button
-        db.hobbyDao().insert(hobbies);
-        db.profileDao().update(profile);
+        DatabaseTask<String, Void> task = new DatabaseTask<>(new DatabaseTask.DatabaseTaskListener<Void>() {
+            @Override
+            public void onFinished(Void result) {
+
+            }
+        }, new DatabaseTask.DatabaseTaskQuery<String, Void>() {
+            @Override
+            public Void execute(String... emails) {
+                // Save button
+                db.hobbyDao().insert(hobbies);
+                db.profileDao().update(profile);
+                return null;
+            }
+        });
+
+        task.execute();
     }
 
     /**

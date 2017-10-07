@@ -16,6 +16,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.imminentapps.friendfinder.R;
+import com.imminentapps.friendfinder.database.DatabaseTask;
 import com.imminentapps.friendfinder.domain.Profile;
 import com.imminentapps.friendfinder.domain.User;
 import com.imminentapps.friendfinder.utils.UserUtil;
@@ -43,19 +44,7 @@ public class ViewProfileScreen extends AppCompatActivity implements GestureDetec
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_view_profile_screen);
 
-        Intent intent = getIntent();
-
-        // Grab the logged in user info and the viewed user info
-        selectedUser = UserUtil.loadUser(intent.getCharSequenceExtra("selectedUserEmail").toString());
-        currentUser = UserUtil.loadUser(intent.getCharSequenceExtra("currentUserEmail").toString());
-
-        // TODO: Handle this case better
-        if (currentUser == null || selectedUser == null) {
-            throw new IllegalStateException("View Profile Screen was not able to locate the users.");
-        }
-
         // Initialize vars/fields
-        selectedProfile = selectedUser.getProfile();
         usernameView = findViewById(R.id.editprofile_usernameTextView);
         listView = findViewById(R.id.hobbyListView);
         aboutMeView = findViewById(R.id.editprofile_aboutMeTextView);
@@ -63,22 +52,91 @@ public class ViewProfileScreen extends AppCompatActivity implements GestureDetec
         friendIcon = findViewById(R.id.friendIcon);
         gestureDetectorCompat = new GestureDetectorCompat(this, this);
 
-        // Setup the view based on the data
-        usernameView.setText(selectedProfile.getUsername());
-        aboutMeView.setText(UserUtil.getAboutMeText(selectedUser));
 
-        // Setup the list adapter
-        ArrayAdapter adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, selectedProfile.getHobbiesAsStrings());
-        listView.setAdapter(adapter);
+        initializeCurrentUserData();
+        initializeSelectedUserData();
+    }
 
-        // Get the profile image
-        setupProfileImage();
+    private void initializeSelectedUserData() {
+        // Grab the user information from the database based on the email passed in
+        Intent intent = getIntent();
+        String email = intent.getCharSequenceExtra("selectedUserEmail").toString();
 
-        // Set the "star" to show if the users are friends.
-        if (!currentUser.isFriendsWith(selectedUser.getId(), getApplicationContext())) {
-            friendIcon.setVisibility(View.INVISIBLE);
-        }
+        DatabaseTask<String, User> task = new DatabaseTask<>(new DatabaseTask.DatabaseTaskListener<User>() {
+            @Override
+            public void onFinished(User user) {
+                // TODO: Handle this case better
+                if (user == null) {
+                    throw new IllegalStateException("HomeScreen was not able to locate the logged in user.");
+                }
+                selectedUser = user;
+                selectedProfile = selectedUser.getProfile();
 
+                // Setup the view based on the data
+                usernameView.setText(selectedProfile.getUsername());
+                aboutMeView.setText(UserUtil.getAboutMeText(selectedUser));
+
+                // Setup the list adapter
+                ArrayAdapter adapter = new ArrayAdapter<>(getApplicationContext(), android.R.layout.simple_list_item_1, selectedProfile.getHobbiesAsStrings());
+                listView.setAdapter(adapter);
+
+                // Get the profile image
+                setupProfileImage();
+
+                // Set the "star" to show if the users are friends.
+                isFriendsWith(selectedUser.getId());
+            }
+
+            private void isFriendsWith(int userId) {
+                DatabaseTask<Integer, Boolean> task = new DatabaseTask<>(new DatabaseTask.DatabaseTaskListener<Boolean>() {
+                    @Override
+                    public void onFinished(Boolean result) {
+                        if (!result) {
+                            friendIcon.setVisibility(View.INVISIBLE);
+                        }
+                    }
+                }, new DatabaseTask.DatabaseTaskQuery<Integer, Boolean>() {
+                    @Override
+                    public Boolean execute(Integer... ids) {
+                        return currentUser.isFriendsWith(ids[0], getApplicationContext());
+                    }
+                });
+
+                task.execute(userId);
+            }
+        }, new DatabaseTask.DatabaseTaskQuery<String, User>() {
+            @Override
+            public User execute(String... emails) {
+                return UserUtil.loadUser(emails[0]);
+            }
+        });
+
+        task.execute(email);
+    }
+
+    private void initializeCurrentUserData() {
+        // Grab the user information from the database based on the email passed in
+        Intent intent = getIntent();
+        String email = intent.getCharSequenceExtra("currentUserEmail").toString();
+
+        DatabaseTask<String, User> task = new DatabaseTask<>(new DatabaseTask.DatabaseTaskListener<User>() {
+            @Override
+            public void onFinished(User user) {
+                // TODO: Handle this case better
+                if (user == null) {
+                    throw new IllegalStateException("HomeScreen was not able to locate the logged in user.");
+                }
+                currentUser = user;
+
+            }
+        }, new DatabaseTask.DatabaseTaskQuery<String, User>() {
+            @Override
+            public User execute(String... emails) {
+                return UserUtil.loadUser(emails[0]);
+            }
+        });
+
+        task.execute(email);
     }
 
     /**

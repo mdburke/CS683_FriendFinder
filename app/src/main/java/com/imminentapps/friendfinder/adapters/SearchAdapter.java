@@ -10,6 +10,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.imminentapps.friendfinder.R;
+import com.imminentapps.friendfinder.database.DatabaseTask;
 import com.imminentapps.friendfinder.domain.User;
 import com.imminentapps.friendfinder.interfaces.ActivityCommunication;
 import com.imminentapps.friendfinder.utils.UserUtil;
@@ -52,21 +53,48 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.SearchItem
      */
     @Override
     public void onBindViewHolder(final SearchItemViewHolder holder, int position) {
-        // Grab the user
-        User user = UserUtil.loadUser(users.get(position).getEmail());
 
-        // Set the fields
-        holder.username.setText(user.getProfile().getUsername());
-        holder.email.setText(user.getEmail());
+        DatabaseTask<String, User> task = new DatabaseTask<>(new DatabaseTask.DatabaseTaskListener<User>() {
+            @Override
+            public void onFinished(User user) {
+                // Set the fields
+                holder.username.setText(user.getProfile().getUsername());
+                holder.email.setText(user.getEmail());
 
-        // Add the onClickListener
-        holder.cardView.setOnClickListener(view -> activityCommunication.userClicked(user.getEmail()));
+                // Add the onClickListener
+                holder.cardView.setOnClickListener(view -> activityCommunication.userClicked(user.getEmail()));
 
-        // If user is not a friend to the current user, make the friend icon invisible
-        if (!activityCommunication.getCurrentUser().isFriendsWith(user.getId(), context)) {
-            holder.friendIcon.setVisibility(View.INVISIBLE);
-        }
+                isFriendsWith(user.getId());
+            }
+
+            private void isFriendsWith(int userId) {
+                DatabaseTask<Integer, Boolean> task = new DatabaseTask<>(new DatabaseTask.DatabaseTaskListener<Boolean>() {
+                    @Override
+                    public void onFinished(Boolean result) {
+                        if (!result) {
+                            holder.friendIcon.setVisibility(View.INVISIBLE);
+                        }
+                    }
+                }, new DatabaseTask.DatabaseTaskQuery<Integer, Boolean>() {
+                    @Override
+                    public Boolean execute(Integer... ids) {
+                        return activityCommunication.getCurrentUser().isFriendsWith(ids[0], context);
+                    }
+                });
+
+                task.execute(userId);
+            }
+        }, new DatabaseTask.DatabaseTaskQuery<String, User>() {
+            @Override
+            public User execute(String... emails) {
+                return UserUtil.loadUser(emails[0]);
+            }
+        });
+
+        task.execute(users.get(position).getEmail());
     }
+
+
 
     @Override
     public int getItemCount() {

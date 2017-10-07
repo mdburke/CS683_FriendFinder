@@ -8,12 +8,13 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.imminentapps.friendfinder.R;
-import com.imminentapps.friendfinder.database.AppDatabase;
+import com.imminentapps.friendfinder.database.DatabaseTask;
 import com.imminentapps.friendfinder.domain.Event;
-import com.imminentapps.friendfinder.utils.DBUtil;
 
 import java.util.Calendar;
 import java.util.Date;
+
+import static com.imminentapps.friendfinder.utils.DBUtil.db;
 
 public class ViewEventScreen extends AppCompatActivity {
     private TextView eventTitle;
@@ -21,14 +22,12 @@ public class ViewEventScreen extends AppCompatActivity {
     private TextView eventLocation;
     private TextView eventDate;
     private Button addToCalendarButton;
-    private AppDatabase db;
     private Event currentEvent;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_view_event_screen);
-        db = DBUtil.getDBInstance();
 
         // Initialize views
         eventTitle = findViewById(R.id.viewEvent_eventTitle);
@@ -43,12 +42,25 @@ public class ViewEventScreen extends AppCompatActivity {
 
         if (eventId == -1) { throw new IllegalStateException("Event Id not passed correctly"); }
 
-        currentEvent = db.eventDao().get(eventId);
+        initializeEventData();
+    }
 
-        eventTitle.setText(currentEvent.getTitle());
-        eventDate.setText(currentEvent.getDate().toString());
-        eventDescription.setText(currentEvent.getDescription());
-        eventLocation.setText(currentEvent.getLocation());
+    private void initializeEventData() {
+        DatabaseTask<Integer, Event> task = new DatabaseTask<>(new DatabaseTask.DatabaseTaskListener<Event>() {
+            @Override
+            public void onFinished(Event event) {
+                currentEvent = event;
+                eventTitle.setText(currentEvent.getTitle());
+                eventDate.setText(currentEvent.getDate().toString());
+                eventDescription.setText(currentEvent.getDescription());
+                eventLocation.setText(currentEvent.getLocation());
+            }
+        }, new DatabaseTask.DatabaseTaskQuery<Integer, Event>() {
+            @Override
+            public Event execute(Integer... eventIDs) {
+                return db.eventDao().get(eventIDs[0]);
+            }
+        });
     }
 
     private void addToCalendarClicked() {

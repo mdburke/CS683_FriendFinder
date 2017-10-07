@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.imminentapps.friendfinder.R;
+import com.imminentapps.friendfinder.database.DatabaseTask;
 import com.imminentapps.friendfinder.domain.Event;
 import com.imminentapps.friendfinder.interfaces.ActivityCommunication;
 import com.imminentapps.friendfinder.utils.EventUtil;
@@ -46,15 +47,23 @@ public class SearchForEventsAdapter extends RecyclerView.Adapter<SearchForEvents
 
     @Override
     public void onBindViewHolder(SearchForEventsAdapter.EventsViewHolder holder, int position) {
-        // Grab the event data from the database
-        Event event = EventUtil.loadEvent(events.get(position).getEventId());
+        DatabaseTask<Integer, Event> task = new DatabaseTask<>(new DatabaseTask.DatabaseTaskListener<Event>() {
+            @Override
+            public void onFinished(Event event) {
+                // Set the fields of the CardView in the RecyclerView
+                holder.date.setText(event.getDate().toString());
+                holder.title.setText(event.getTitle());
 
-        // Set the fields of the CardView in the RecyclerView
-        holder.date.setText(event.getDate().toString());
-        holder.title.setText(event.getTitle());
-
-        // Add the onClickListener
-        holder.cardView.setOnClickListener(view -> activityCommunication.userClicked(String.valueOf(event.getEventId())));
+                // Add the onClickListener
+                holder.cardView.setOnClickListener(view -> activityCommunication.userClicked(String.valueOf(event.getEventId())));
+            }
+        }, new DatabaseTask.DatabaseTaskQuery<Integer, Event>() {
+            @Override
+            public Event execute(Integer... position) {
+                return EventUtil.loadEvent(events.get(position[0]).getEventId());
+            }
+        });
+        task.execute(position);
     }
 
     @Override

@@ -38,7 +38,6 @@ public abstract class AppDatabase extends RoomDatabase {
             INSTANCE = Room.databaseBuilder(context.getApplicationContext(),
                     AppDatabase.class,
                     "user-database")
-                    .allowMainThreadQueries() // TODO: Remove this and use worker threads
                     .build();
         }
         return INSTANCE;

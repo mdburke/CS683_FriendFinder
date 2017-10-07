@@ -12,17 +12,14 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.imminentapps.friendfinder.R;
-import com.imminentapps.friendfinder.database.AppDatabase;
 import com.imminentapps.friendfinder.database.DatabaseTask;
 import com.imminentapps.friendfinder.domain.User;
-import com.imminentapps.friendfinder.utils.DBUtil;
 import com.imminentapps.friendfinder.utils.UserUtil;
 
 public class HomeScreen extends AppCompatActivity {
     private final String TAG = this.getClass().getSimpleName();
     private TextView welcomeMessageTextView;
     private User currentUser;
-    private AppDatabase db;
     private static final int ACTION_FOR_INTENT_CALLBACK = 1;
 
     ProgressBar progressBar;
@@ -35,7 +32,6 @@ public class HomeScreen extends AppCompatActivity {
         setContentView(R.layout.activity_home_screen);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        db = DBUtil.getDBInstance();
 
         // Initialize on click listeners for buttons
         initializeOnClickListeners();
