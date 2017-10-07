@@ -8,19 +8,24 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Button;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.imminentapps.friendfinder.R;
 import com.imminentapps.friendfinder.database.AppDatabase;
-import com.imminentapps.friendfinder.utils.DBUtil;
-import com.imminentapps.friendfinder.domain.Profile;
+import com.imminentapps.friendfinder.database.DatabaseTask;
 import com.imminentapps.friendfinder.domain.User;
+import com.imminentapps.friendfinder.utils.DBUtil;
+import com.imminentapps.friendfinder.utils.UserUtil;
 
 public class HomeScreen extends AppCompatActivity {
     private final String TAG = this.getClass().getSimpleName();
     private TextView welcomeMessageTextView;
     private User currentUser;
     private AppDatabase db;
+    private static final int ACTION_FOR_INTENT_CALLBACK = 1;
+
+    ProgressBar progressBar;
 
     //************* Lifecycle Methods ************//
 
@@ -32,28 +37,40 @@ public class HomeScreen extends AppCompatActivity {
         setSupportActionBar(toolbar);
         db = DBUtil.getDBInstance();
 
+        // Initialize on click listeners for buttons
+        initializeOnClickListeners();
+
         // Initialize the welcomeMessageTextView field
         welcomeMessageTextView = findViewById(R.id.textView);
 
+        initializeUserData();
+    }
+
+    private void initializeUserData() {
         // Grab the user information from the database based on the email passed in
         Intent intent = getIntent();
-        currentUser = db.userDao().findByEmail((intent.getCharSequenceExtra("currentUserEmail").toString()));
+        String email = intent.getCharSequenceExtra("currentUserEmail").toString();
 
-        // TODO: Handle this case better
-        if (currentUser == null) {
-            throw new IllegalStateException("HomeScreen was not able to locate the logged in user.");
-        }
+        DatabaseTask<String, User> task = new DatabaseTask<>(new DatabaseTask.DatabaseTaskListener<User>() {
+            @Override
+            public void onFinished(User user) {
+                // TODO: Handle this case better
+                if (user == null) {
+                    throw new IllegalStateException("HomeScreen was not able to locate the logged in user.");
+                }
+                currentUser = user;
+                // TODO: Figure out how to internationalize by using vars in strings.xml
+                // Set welcome message to user name
+                welcomeMessageTextView.setText(getString(R.string.home_title) + " " + currentUser.getProfile().getUsername());
+            }
+        }, new DatabaseTask.DatabaseTaskQuery<String, User>() {
+            @Override
+            public User execute(String... emails) {
+                return UserUtil.loadUser(emails[0]);
+            }
+        });
 
-        // TODO: Figure out how to get Room to pull the Profile info in with the previous Query
-        Profile userProfile = db.profileDao().findById(currentUser.getId());
-        currentUser.setProfile(userProfile);
-
-        // TODO: Figure out how to internationalize by using vars in strings.xml
-        // Set welcome message to user name
-        welcomeMessageTextView.setText(getString(R.string.home_title) + " " + currentUser.getProfile().getUsername());
-
-        // Initialize on click listeners for buttons
-        initializeOnClickListeners();
+        task.execute(email);
     }
 
     @Override

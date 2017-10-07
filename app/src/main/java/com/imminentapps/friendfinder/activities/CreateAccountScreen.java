@@ -3,6 +3,7 @@ package com.imminentapps.friendfinder.activities;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -12,9 +13,10 @@ import android.widget.TextView;
 
 import com.imminentapps.friendfinder.R;
 import com.imminentapps.friendfinder.database.AppDatabase;
-import com.imminentapps.friendfinder.utils.DBUtil;
+import com.imminentapps.friendfinder.database.DatabaseTask;
 import com.imminentapps.friendfinder.domain.Profile;
 import com.imminentapps.friendfinder.domain.User;
+import com.imminentapps.friendfinder.utils.DBUtil;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
@@ -74,15 +76,58 @@ public class CreateAccountScreen extends AppCompatActivity {
         User newUser = new User(emailView.getText().toString(),
                 passwordView.getText().toString(), profile);
 
-        // Add the user to the Database
-        // TODO: Figure out how to do this all in one transaction
-        db.userDao().insertUsers(newUser);
-        db.profileDao().insert(newUser.getProfile());
+        DatabaseTask<User, String> task = new DatabaseTask<>(new DatabaseTask.DatabaseTaskListener<String>() {
+            @Override
+            public void onFinished(String email) {
+                // Navigate to the HomeScreen as if the user has just logged in
+                Intent intent = new Intent(getApplicationContext(), HomeScreen.class);
+                intent.putExtra("currentUserEmail", email);
+                startActivity(intent);
+            }
+        }, new DatabaseTask.DatabaseTaskQuery<User, String>() {
+            @Override
+            public String execute(User... users) {
+                // Add the user to the Database
+                // TODO: Figure out how to do this all in one transaction
+                db.userDao().insertUsers(users[0]);
+                db.profileDao().insert(users[0].getProfile());
+                return users[0].getEmail();
+            }
+        });
 
-        // Navigate to the HomeScreen as if the user has just logged in
-        Intent intent = new Intent(this, HomeScreen.class);
-        intent.putExtra("currentUserEmail", emailView.getText());
-        startActivity(intent);
+        task.execute(newUser);
+    }
+
+    private class InsertUserTask extends AsyncTask<User, Integer, Void> {
+        private Context mContext;
+
+        protected InsertUserTask(Context mContext) {
+            this.mContext = mContext;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            // Navigate to the HomeScreen as if the user has just logged in
+            Intent intent = new Intent(mContext, HomeScreen.class);
+            intent.putExtra("currentUserEmail", emailView.getText());
+            startActivity(intent);
+        }
+
+        // TODO: Add some kind of progress update in case this is a long running query.
+        @Override
+        protected void onProgressUpdate(Integer... values) {
+            super.onProgressUpdate(values);
+        }
+
+        @Override
+        // TODO: Make this work with more than one user
+        protected Void doInBackground(User... users) {
+            // Add the user to the Database
+            // TODO: Figure out how to do this all in one transaction
+            db.userDao().insertUsers(users[0]);
+            db.profileDao().insert(users[0].getProfile());
+            return null;
+        }
     }
 
     /**
