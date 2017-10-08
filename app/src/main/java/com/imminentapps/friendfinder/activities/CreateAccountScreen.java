@@ -10,14 +10,21 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.mobileconnectors.s3.transferutility.TransferObserver;
+import com.amazonaws.mobileconnectors.s3.transferutility.TransferUtility;
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.AmazonS3Client;
 import com.imminentapps.friendfinder.R;
 import com.imminentapps.friendfinder.database.AppDatabase;
 import com.imminentapps.friendfinder.database.DatabaseTask;
 import com.imminentapps.friendfinder.domain.Profile;
 import com.imminentapps.friendfinder.domain.User;
 import com.imminentapps.friendfinder.utils.DBUtil;
+import com.imminentapps.friendfinder.utils.PropertiesUtil;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -42,6 +49,8 @@ public class CreateAccountScreen extends AppCompatActivity {
     // Instance vars
     private boolean isValidEmail;
     private boolean isValidUsername;
+    private TransferUtility transferUtility;
+    private AmazonS3 s3;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,6 +68,17 @@ public class CreateAccountScreen extends AppCompatActivity {
 
         // Add onClickListener
         createAccountButton.setOnClickListener((view -> createAccountAndNavigateHome()));
+        BasicAWSCredentials credentials = null;
+
+        try {
+             credentials = new BasicAWSCredentials(
+                    PropertiesUtil.getProperty("AccessKey", getApplicationContext()),
+                    PropertiesUtil.getProperty("SecretKey", getApplicationContext()));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        s3 = new AmazonS3Client(credentials);
+        transferUtility = new TransferUtility(s3, getApplicationContext());
     }
 
     /**
@@ -67,7 +87,7 @@ public class CreateAccountScreen extends AppCompatActivity {
      */
     private void createAccountAndNavigateHome() {
         // Guard Clause
-        if (!validateEmail() || !validatePassword() || !validateUsername()) { return; }
+        if (!validateData()) { return; }
 
         // Create the new profile and user with the given information
         Profile profile = new Profile(null,
@@ -99,6 +119,11 @@ public class CreateAccountScreen extends AppCompatActivity {
         });
 
         task.execute(newUser);
+    }
+
+    private boolean validateData() {
+//        validateEmail();
+        return true;
     }
 
     /**
@@ -206,7 +231,16 @@ public class CreateAccountScreen extends AppCompatActivity {
 
                 // Save the uri to the profile
                 profileImageUri = filename;
+
+                File newFile = new File(getApplicationContext().getFilesDir() + "/" + profileImageUri);
+
+                TransferObserver observer = transferUtility.upload(
+                        "imminentapps-friendfinder-cs683-profile-images",
+                        profileImageUri,
+                        newFile
+                );
             } catch (Exception e) {
+                e.printStackTrace();
                 Log.e(TAG, "Error saving profile image.");
             } finally {
                 if (outputStream != null) {
