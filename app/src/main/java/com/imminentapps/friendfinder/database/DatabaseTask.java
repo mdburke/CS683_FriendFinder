@@ -3,6 +3,7 @@ package com.imminentapps.friendfinder.database;
 import android.os.AsyncTask;
 
 /**
+ * Genericized subclass of AsyncTask to support Database Query tasks
  * Created by mburke on 10/6/17.
  */
 public class DatabaseTask<T, U> extends AsyncTask<T, Void, U> {
@@ -17,7 +18,7 @@ public class DatabaseTask<T, U> extends AsyncTask<T, Void, U> {
     private final DatabaseTaskListener<U> listener;
     private final DatabaseTaskQuery<T, U> query;
 
-    public DatabaseTask(DatabaseTaskListener listener, DatabaseTaskQuery query) {
+    public DatabaseTask(DatabaseTaskListener<U> listener, DatabaseTaskQuery<T, U> query) {
         this.listener = listener;
         this.query = query;
     }

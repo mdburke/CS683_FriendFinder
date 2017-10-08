@@ -43,7 +43,7 @@ public class SearchForEventsScreen extends AppCompatActivity implements Activity
     }
 
     private void initializeAdapter() {
-        DatabaseTask<Void, User> task = new DatabaseTask<>(new DatabaseTask.DatabaseTaskListener<SearchForEventsAdapter>() {
+        DatabaseTask<Void, SearchForEventsAdapter> task = new DatabaseTask<>(new DatabaseTask.DatabaseTaskListener<SearchForEventsAdapter>() {
             @Override
             public void onFinished(SearchForEventsAdapter adapter) {
                 searchForEventsAdapter = adapter;

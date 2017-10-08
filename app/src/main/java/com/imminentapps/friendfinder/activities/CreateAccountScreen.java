@@ -88,7 +88,11 @@ public class CreateAccountScreen extends AppCompatActivity {
      */
     private void createAccountAndNavigateHome() {
         // Guard Clause
-        if (!validateData()) { return; }
+        try {
+            validateData();
+        } catch (IllegalArgumentException e) {
+            return;
+        }
 
         // Create the new profile and user with the given information
         Profile profile = new Profile(null,
@@ -122,9 +126,32 @@ public class CreateAccountScreen extends AppCompatActivity {
         task.execute(newUser);
     }
 
-    private boolean validateData() {
-//        validateEmail();
-        return true;
+    private void validateData() throws IllegalArgumentException {
+        DatabaseTask<Void, Boolean> task = new DatabaseTask<Void, Boolean>(new DatabaseTask.DatabaseTaskListener<Boolean>() {
+            @Override
+            public void onFinished(Boolean result) {
+                if (!result) {
+                    throw new IllegalArgumentException("Invalid user data entered.");
+                }
+            }
+        }, new DatabaseTask.DatabaseTaskQuery<Void, Boolean>() {
+            @Override
+            public Boolean execute(Void... params) {
+                Boolean[] statuses = new Boolean[3];
+                statuses[0] = validateEmail();
+                statuses[1] = validatePassword();
+                statuses[2] = validateUsername();
+
+                for (Boolean status : statuses) {
+                    if (!status) {
+                        return false;
+                    }
+                }
+
+                return true;
+            }
+        });
+        task.execute();
     }
 
     /**

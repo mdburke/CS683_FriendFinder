@@ -94,8 +94,6 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.SearchItem
         task.execute(users.get(position).getEmail());
     }
 
-
-
     @Override
     public int getItemCount() {
         return users.size();

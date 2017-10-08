@@ -25,9 +25,9 @@ import java.util.List;
 public class SearchForEventsAdapter extends RecyclerView.Adapter<SearchForEventsAdapter.EventsViewHolder>  {
 
     // Object used for communicating back to the parent activity. See interface for details.
-    ActivityCommunication activityCommunication;
-    List<Event> events;
-    Context context;
+    private ActivityCommunication activityCommunication;
+    private List<Event> events;
+    private Context context;
 
     public SearchForEventsAdapter(List<Event> events, Context context) {
         this.events = events;
@@ -46,6 +46,13 @@ public class SearchForEventsAdapter extends RecyclerView.Adapter<SearchForEvents
     }
 
     @Override
+    public int getItemCount() {
+        return events.size();
+    }
+
+
+    @Override
+    @SuppressWarnings("Convert2Lambda")
     public void onBindViewHolder(SearchForEventsAdapter.EventsViewHolder holder, int position) {
         DatabaseTask<Integer, Event> task = new DatabaseTask<>(new DatabaseTask.DatabaseTaskListener<Event>() {
             @Override
@@ -64,11 +71,6 @@ public class SearchForEventsAdapter extends RecyclerView.Adapter<SearchForEvents
             }
         });
         task.execute(position);
-    }
-
-    @Override
-    public int getItemCount() {
-        return events.size();
     }
 
     /**
