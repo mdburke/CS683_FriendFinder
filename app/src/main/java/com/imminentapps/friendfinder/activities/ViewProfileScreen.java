@@ -30,6 +30,8 @@ import com.imminentapps.friendfinder.utils.Constants;
 import com.imminentapps.friendfinder.utils.PropertiesUtil;
 import com.imminentapps.friendfinder.utils.UserUtil;
 
+import org.apache.commons.io.IOUtils;
+
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -173,18 +175,20 @@ public class ViewProfileScreen extends AppCompatActivity implements GestureDetec
                 @Override
                 protected Bitmap doInBackground(Void... objects) {
                     S3Object object;
+                    InputStream objectData = null;
+                    Bitmap bitmap = null;
                     try {
                         object = s3.getObject(Constants.AWS_PROFILE_IMAGE_BUCKET, selectedProfile.getProfileImageUri());
+                        objectData = object.getObjectContent();
+                        bitmap = BitmapFactory.decodeStream(objectData);
                     } catch (AmazonS3Exception e) {
                         e.printStackTrace();
                         Log.i("FILE", "AWS key did not exist for profile image.");
-                    }
-                    InputStream objectData = object.getObjectContent();
-                    Bitmap bitmap = BitmapFactory.decodeStream(objectData);
-                    try {
-                        objectData.close();
-                    } catch (IOException e) {
+                    } catch (Exception e) {
                         e.printStackTrace();
+                        Log.i("FILE", "Error getting profile image data.");
+                    } finally {
+                        IOUtils.closeQuietly(objectData);
                     }
                     return bitmap;
                 }
