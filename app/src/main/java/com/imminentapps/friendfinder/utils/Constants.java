@@ -13,5 +13,6 @@ public class Constants {
     public static final String SEARCH_FILTER_NOT_FRIENDS = "Not Friends";
     public static final String SEARCH_FILTER_ALL_USERS = "All Users";
 
+    public static final String AWS_PROFILE_IMAGE_BUCKET = "imminentapps-friendfinder-cs683-profile-images";
     private Constants(){}
 }

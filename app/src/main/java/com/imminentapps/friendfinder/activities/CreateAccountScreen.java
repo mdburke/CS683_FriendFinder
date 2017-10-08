@@ -20,6 +20,7 @@ import com.imminentapps.friendfinder.database.AppDatabase;
 import com.imminentapps.friendfinder.database.DatabaseTask;
 import com.imminentapps.friendfinder.domain.Profile;
 import com.imminentapps.friendfinder.domain.User;
+import com.imminentapps.friendfinder.utils.Constants;
 import com.imminentapps.friendfinder.utils.DBUtil;
 import com.imminentapps.friendfinder.utils.PropertiesUtil;
 
@@ -235,10 +236,11 @@ public class CreateAccountScreen extends AppCompatActivity {
                 File newFile = new File(getApplicationContext().getFilesDir() + "/" + profileImageUri);
 
                 TransferObserver observer = transferUtility.upload(
-                        "imminentapps-friendfinder-cs683-profile-images",
+                        Constants.AWS_PROFILE_IMAGE_BUCKET,
                         profileImageUri,
                         newFile
                 );
+
             } catch (Exception e) {
                 e.printStackTrace();
                 Log.e(TAG, "Error saving profile image.");

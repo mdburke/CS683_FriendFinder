@@ -3,6 +3,7 @@ package com.imminentapps.friendfinder.activities;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.view.GestureDetectorCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -15,13 +16,22 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.mobileconnectors.s3.transferutility.TransferUtility;
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.AmazonS3Client;
+import com.amazonaws.services.s3.model.AmazonS3Exception;
+import com.amazonaws.services.s3.model.S3Object;
 import com.imminentapps.friendfinder.R;
 import com.imminentapps.friendfinder.database.DatabaseTask;
 import com.imminentapps.friendfinder.domain.Profile;
 import com.imminentapps.friendfinder.domain.User;
+import com.imminentapps.friendfinder.utils.Constants;
+import com.imminentapps.friendfinder.utils.PropertiesUtil;
 import com.imminentapps.friendfinder.utils.UserUtil;
 
-import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
 public class ViewProfileScreen extends AppCompatActivity implements GestureDetector.OnGestureListener {
     private final String TAG = this.getClass().getSimpleName();
@@ -38,6 +48,8 @@ public class ViewProfileScreen extends AppCompatActivity implements GestureDetec
     private TextView usernameView;
     private ListView listView;
     private TextView aboutMeView;
+    private TransferUtility transferUtility;
+    private AmazonS3 s3;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,6 +64,17 @@ public class ViewProfileScreen extends AppCompatActivity implements GestureDetec
         friendIcon = findViewById(R.id.friendIcon);
         gestureDetectorCompat = new GestureDetectorCompat(this, this);
 
+        BasicAWSCredentials credentials = null;
+
+        try {
+            credentials = new BasicAWSCredentials(
+                    PropertiesUtil.getProperty("AccessKey", getApplicationContext()),
+                    PropertiesUtil.getProperty("SecretKey", getApplicationContext()));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        s3 = new AmazonS3Client(credentials);
+        transferUtility = new TransferUtility(s3, getApplicationContext());
 
         initializeCurrentUserData();
         initializeSelectedUserData();
@@ -146,22 +169,35 @@ public class ViewProfileScreen extends AppCompatActivity implements GestureDetec
     private void setupProfileImage() {
         // TODO: Add a default image if bitmap is null or the uri is null
         if (selectedProfile.getProfileImageUri() != null) {
-            Bitmap bitmap = null;
-            String uri = selectedProfile.getProfileImageUri();
-            FileInputStream inputStream;
+            AsyncTask<Void, Void, Bitmap> task = new AsyncTask<Void, Void, Bitmap>() {
+                @Override
+                protected Bitmap doInBackground(Void... objects) {
+                    S3Object object;
+                    try {
+                        object = s3.getObject(Constants.AWS_PROFILE_IMAGE_BUCKET, selectedProfile.getProfileImageUri());
+                    } catch (AmazonS3Exception e) {
+                        e.printStackTrace();
+                        Log.i("FILE", "AWS key did not exist for profile image.");
+                    }
+                    InputStream objectData = object.getObjectContent();
+                    Bitmap bitmap = BitmapFactory.decodeStream(objectData);
+                    try {
+                        objectData.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    return bitmap;
+                }
 
-            try {
-                inputStream = openFileInput(uri);
-                bitmap = BitmapFactory.decodeStream(inputStream);
-                inputStream.close();
-            } catch (Exception e) {
-                Log.e(this.getClass().toString(), "Error loading image");
-                e.printStackTrace();
-            }
+                @Override
+                protected void onPostExecute(Bitmap bitmap) {
+                    if (bitmap != null) {
+                        profileImageView.setImageBitmap(bitmap);
+                    }
+                }
+            };
 
-            if (bitmap != null) {
-                profileImageView.setImageBitmap(bitmap);
-            }
+            task.execute();
         }
     }
 
