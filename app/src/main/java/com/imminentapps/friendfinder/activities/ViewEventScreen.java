@@ -5,13 +5,13 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.CalendarContract;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.widget.Button;
 import android.widget.TextView;
 
 import com.imminentapps.friendfinder.R;
 import com.imminentapps.friendfinder.database.DatabaseTask;
 import com.imminentapps.friendfinder.domain.Event;
+import com.imminentapps.friendfinder.utils.Constants;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -52,6 +52,10 @@ public class ViewEventScreen extends AppCompatActivity {
         initializeEventData(eventId);
     }
 
+    /**
+     * Initialize the event data using an async DatabaseTask
+     * @param eventId
+     */
     private void initializeEventData(int eventId) {
         DatabaseTask<Integer, Event> task = new DatabaseTask<>(new DatabaseTask.DatabaseTaskListener<Event>() {
             @Override
@@ -91,15 +95,15 @@ public class ViewEventScreen extends AppCompatActivity {
     }
 
     private void showOnMapClicked() {
-        Log.i("MAP", "show on map clicked");
         String location = null;
         try {
+            // URL encode the address as required.
             location = URLEncoder.encode(eventLocation.getText().toString(), "UTF-8");
-            Log.i("MAP", location);
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
-        Uri geolocation = Uri.parse("geo:0,0?q=" + Uri.encode(location));
+        // Turn the String into a Uri as required
+        Uri geolocation = Uri.parse(Constants.GEO_PREFIX + Uri.encode(location));
 
         Intent intent = new Intent(Intent.ACTION_VIEW);
         intent.setData(geolocation);

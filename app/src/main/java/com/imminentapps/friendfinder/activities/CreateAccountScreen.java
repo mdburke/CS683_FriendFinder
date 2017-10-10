@@ -22,7 +22,7 @@ import com.imminentapps.friendfinder.domain.Profile;
 import com.imminentapps.friendfinder.domain.User;
 import com.imminentapps.friendfinder.utils.Constants;
 import com.imminentapps.friendfinder.utils.DBUtil;
-import com.imminentapps.friendfinder.utils.PropertiesUtil;
+import com.imminentapps.friendfinder.utils.AWSCredentialsUtil;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -73,8 +73,8 @@ public class CreateAccountScreen extends AppCompatActivity {
 
         try {
              credentials = new BasicAWSCredentials(
-                    PropertiesUtil.getProperty("AccessKey", getApplicationContext()),
-                    PropertiesUtil.getProperty("SecretKey", getApplicationContext()));
+                    AWSCredentialsUtil.getCreds("AccessKey", getApplicationContext()),
+                    AWSCredentialsUtil.getCreds("SecretKey", getApplicationContext()));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -127,7 +127,7 @@ public class CreateAccountScreen extends AppCompatActivity {
     }
 
     private void validateData() throws IllegalArgumentException {
-        DatabaseTask<Void, Boolean> task = new DatabaseTask<Void, Boolean>(new DatabaseTask.DatabaseTaskListener<Boolean>() {
+        DatabaseTask<Void, Boolean> task = new DatabaseTask<>(new DatabaseTask.DatabaseTaskListener<Boolean>() {
             @Override
             public void onFinished(Boolean result) {
                 if (!result) {
@@ -260,14 +260,13 @@ public class CreateAccountScreen extends AppCompatActivity {
                 // Save the uri to the profile
                 profileImageUri = filename;
 
+                // Upload image to S3
                 File newFile = new File(getApplicationContext().getFilesDir() + "/" + profileImageUri);
-
                 TransferObserver observer = transferUtility.upload(
                         Constants.AWS_PROFILE_IMAGE_BUCKET,
                         profileImageUri,
                         newFile
                 );
-
             } catch (Exception e) {
                 e.printStackTrace();
                 Log.e(TAG, "Error saving profile image.");

@@ -27,7 +27,7 @@ import com.imminentapps.friendfinder.database.DatabaseTask;
 import com.imminentapps.friendfinder.domain.Profile;
 import com.imminentapps.friendfinder.domain.User;
 import com.imminentapps.friendfinder.utils.Constants;
-import com.imminentapps.friendfinder.utils.PropertiesUtil;
+import com.imminentapps.friendfinder.utils.AWSCredentialsUtil;
 import com.imminentapps.friendfinder.utils.UserUtil;
 
 import org.apache.commons.io.IOUtils;
@@ -70,8 +70,8 @@ public class ViewProfileScreen extends AppCompatActivity implements GestureDetec
 
         try {
             credentials = new BasicAWSCredentials(
-                    PropertiesUtil.getProperty("AccessKey", getApplicationContext()),
-                    PropertiesUtil.getProperty("SecretKey", getApplicationContext()));
+                    AWSCredentialsUtil.getCreds("AccessKey", getApplicationContext()),
+                    AWSCredentialsUtil.getCreds("SecretKey", getApplicationContext()));
         } catch (IOException e) {
             e.printStackTrace();
         }

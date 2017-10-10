@@ -7,10 +7,20 @@ import android.os.AsyncTask;
  * Created by mburke on 10/6/17.
  */
 public class DatabaseTask<T, U> extends AsyncTask<T, Void, U> {
+    /**
+     * Listener to be implemented by the Activity in order to update the UI / set vars /
+     * access the result
+     * @param <U>
+     */
     public interface DatabaseTaskListener<U> {
         void onFinished(U result);
     }
 
+    /**
+     * Interface to be implemented by the Activity that will be executed on the separate thread.
+     * @param <T>
+     * @param <U>
+     */
     public interface DatabaseTaskQuery<T, U> {
         U execute(T... params);
     }

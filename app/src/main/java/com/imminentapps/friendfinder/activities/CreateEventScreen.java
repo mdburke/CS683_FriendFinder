@@ -46,7 +46,7 @@ public class CreateEventScreen extends AppCompatActivity {
         DatabaseTask<Event, Void> task = new DatabaseTask<>(new DatabaseTask.DatabaseTaskListener<Void>() {
             @Override
             public void onFinished(Void result) {
-
+                // Do nothing
             }
         }, new DatabaseTask.DatabaseTaskQuery<Event, Void>() {
             @Override
