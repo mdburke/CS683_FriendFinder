@@ -1,5 +1,7 @@
 package com.imminentapps.friendfinder.activities;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -26,8 +28,8 @@ import com.imminentapps.friendfinder.R;
 import com.imminentapps.friendfinder.database.DatabaseTask;
 import com.imminentapps.friendfinder.domain.Profile;
 import com.imminentapps.friendfinder.domain.User;
-import com.imminentapps.friendfinder.utils.Constants;
 import com.imminentapps.friendfinder.utils.AWSCredentialsUtil;
+import com.imminentapps.friendfinder.utils.Constants;
 import com.imminentapps.friendfinder.utils.UserUtil;
 
 import org.apache.commons.io.IOUtils;
@@ -245,16 +247,83 @@ public class ViewProfileScreen extends AppCompatActivity implements GestureDetec
         // Logic taken from: http://androidtuts4u.blogspot.com/2013/03/swipe-or-onfling-event-android.html
         if (event2.getX() - event1.getX() > SWIPE_MIN_DISTANCE) {
             // Detected left -> right swipe
-            currentUser.addFriend(selectedUser.getId(), getApplicationContext());
-            friendIcon.setVisibility(View.VISIBLE);
-            Log.i(TAG, "Left to right fling detected");
+            DatabaseTask<Void, Integer> task = new DatabaseTask<Void, Integer>(new DatabaseTask.DatabaseTaskListener<Integer>() {
+                @Override
+                public void onFinished(Integer result) {
+                    if (result != null) {
+                        friendIcon.setVisibility(result);
+                    } else {
+                        AlertDialog.Builder alertBuilder = new AlertDialog.Builder(ViewProfileScreen.this);
+                        alertBuilder
+                                .setTitle("Invalid Action")
+                                .setMessage("You are already friends with this user.")
+                                .setCancelable(false)
+                                .setNegativeButton("Return",
+                                        new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialogInterface, int i) {
+                                                dialogInterface.cancel();
+                                            }
+                                        }
+                                );
+
+                        AlertDialog alertDialog = alertBuilder.create();
+                        alertDialog.show();
+                    }
+                }
+            }, new DatabaseTask.DatabaseTaskQuery<Void, Integer>() {
+                @Override
+                public Integer execute(Void... params) {
+                    if (currentUser.isFriendsWith(selectedUser.getId(), getApplicationContext())) {
+                        return null;
+                    }
+
+                    currentUser.addFriend(selectedUser.getId(), getApplicationContext());
+                    Log.i(TAG, "Left to right fling detected");
+                    return View.VISIBLE;
+                }
+            });
+            task.execute();
         } else if (event1.getX() - event2.getX() > SWIPE_MIN_DISTANCE) {
             // Detected right -> left swipe
-            currentUser.removeFriend(selectedUser.getId(), getApplicationContext());
-            friendIcon.setVisibility(View.INVISIBLE);
-            Log.i(TAG, "Right to left fling detected");
-        }
+            DatabaseTask<Void, Integer> task = new DatabaseTask<Void, Integer>(new DatabaseTask.DatabaseTaskListener<Integer>() {
+                @Override
+                public void onFinished(Integer result) {
+                    if (result != null) {
+                        friendIcon.setVisibility(result);
+                    } else {
+                        AlertDialog.Builder alertBuilder = new AlertDialog.Builder(ViewProfileScreen.this);
+                        alertBuilder
+                                .setTitle("Invalid Action")
+                                .setMessage("You are already not friends with this user.")
+                                .setCancelable(false)
+                                .setNegativeButton("Return",
+                                        new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialogInterface, int i) {
+                                                dialogInterface.cancel();
+                                            }
+                                        }
+                                );
 
+                        AlertDialog alertDialog = alertBuilder.create();
+                        alertDialog.show();
+                    }
+                }
+            }, new DatabaseTask.DatabaseTaskQuery<Void, Integer>() {
+                @Override
+                public Integer execute(Void... params) {
+                    if (!currentUser.isFriendsWith(selectedUser.getId(), getApplicationContext())) {
+                        return null;
+                    }
+
+                    currentUser.removeFriend(selectedUser.getId(), getApplicationContext());
+                    Log.i(TAG, "Right to Left fling detected");
+                    return View.INVISIBLE;
+                }
+            });
+            task.execute();
+        }
         return true;
     }
 }
