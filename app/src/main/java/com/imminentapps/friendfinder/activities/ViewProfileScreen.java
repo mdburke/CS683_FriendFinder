@@ -1,5 +1,7 @@
 package com.imminentapps.friendfinder.activities;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -9,6 +11,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.view.GestureDetectorCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
@@ -16,6 +19,7 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.amazonaws.auth.BasicAWSCredentials;
@@ -54,11 +58,15 @@ public class ViewProfileScreen extends AppCompatActivity implements GestureDetec
     private TextView aboutMeView;
     private TransferUtility transferUtility;
     private AmazonS3 s3;
+    private Toolbar toolbar;
+    private ProgressBar progressBar;
+    private View mainView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_view_profile_screen);
+
 
         // Initialize vars/fields
         usernameView = findViewById(R.id.editprofile_usernameTextView);
@@ -67,6 +75,12 @@ public class ViewProfileScreen extends AppCompatActivity implements GestureDetec
         profileImageView = findViewById(R.id.editprofile_profileImageView);
         friendIcon = findViewById(R.id.friendIcon);
         gestureDetectorCompat = new GestureDetectorCompat(this, this);
+        progressBar = findViewById(R.id.progress_loader);
+        mainView = findViewById(R.id.viewProfile_mainView);
+
+//        progressView = findViewById(R.id.viewProfile_progressView);
+//        profileView = findViewById(R.id.viewProfile_profileView);
+//        showProgress(true);
 
         BasicAWSCredentials credentials = null;
 
@@ -79,9 +93,42 @@ public class ViewProfileScreen extends AppCompatActivity implements GestureDetec
         }
         s3 = new AmazonS3Client(credentials);
         transferUtility = new TransferUtility(s3, getApplicationContext());
+    }
 
-        initializeCurrentUserData();
-        initializeSelectedUserData();
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        AsyncTask<Void, Void, Void> task = new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected void onPreExecute() {
+                showProgress(true);
+            }
+
+            @Override
+            protected Void doInBackground(Void... objects) {
+
+                try {
+                    Thread.sleep(3000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                initializeCurrentUserData();
+                initializeSelectedUserData();
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(Void o) {
+            }
+        };
+        task.execute();
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
     }
 
     private void initializeSelectedUserData() {
@@ -167,6 +214,32 @@ public class ViewProfileScreen extends AppCompatActivity implements GestureDetec
     }
 
     /**
+     * Shows the progress UI and hides the login form.
+     */
+    private void showProgress(final boolean show) {
+        // Use these APIs to fade-in the progress spinner.
+        int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
+
+        mainView.setVisibility(show ? View.GONE : View.VISIBLE);
+        mainView.animate().setDuration(shortAnimTime).alpha(
+                show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                mainView.setVisibility(show ? View.GONE : View.VISIBLE);
+            }
+        });
+
+        progressBar.setVisibility(show ? View.VISIBLE : View.GONE);
+        progressBar.animate().setDuration(shortAnimTime).alpha(
+                show ? 1 : 0).setListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                progressBar.setVisibility(show ? View.VISIBLE : View.GONE);
+            }
+        });
+    }
+
+    /**
      * Grabs the profile image from the file system, transforms to Bitmap
      * and set the profileImageView to that bitmap.
      */
@@ -200,6 +273,7 @@ public class ViewProfileScreen extends AppCompatActivity implements GestureDetec
                     if (bitmap != null) {
                         profileImageView.setImageBitmap(bitmap);
                     }
+                    showProgress(false);
                 }
             };
 
@@ -247,7 +321,7 @@ public class ViewProfileScreen extends AppCompatActivity implements GestureDetec
         // Logic taken from: http://androidtuts4u.blogspot.com/2013/03/swipe-or-onfling-event-android.html
         if (event2.getX() - event1.getX() > SWIPE_MIN_DISTANCE) {
             // Detected left -> right swipe
-            DatabaseTask<Void, Integer> task = new DatabaseTask<Void, Integer>(new DatabaseTask.DatabaseTaskListener<Integer>() {
+            DatabaseTask<Void, Integer> task = new DatabaseTask<>(new DatabaseTask.DatabaseTaskListener<Integer>() {
                 @Override
                 public void onFinished(Integer result) {
                     if (result != null) {
@@ -286,7 +360,7 @@ public class ViewProfileScreen extends AppCompatActivity implements GestureDetec
             task.execute();
         } else if (event1.getX() - event2.getX() > SWIPE_MIN_DISTANCE) {
             // Detected right -> left swipe
-            DatabaseTask<Void, Integer> task = new DatabaseTask<Void, Integer>(new DatabaseTask.DatabaseTaskListener<Integer>() {
+            DatabaseTask<Void, Integer> task = new DatabaseTask<>(new DatabaseTask.DatabaseTaskListener<Integer>() {
                 @Override
                 public void onFinished(Integer result) {
                     if (result != null) {
