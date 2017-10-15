@@ -11,7 +11,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.view.GestureDetectorCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
@@ -58,15 +57,14 @@ public class ViewProfileScreen extends AppCompatActivity implements GestureDetec
     private TextView aboutMeView;
     private TransferUtility transferUtility;
     private AmazonS3 s3;
-    private Toolbar toolbar;
     private ProgressBar progressBar;
     private View mainView;
+    private ImageView canvasNoteView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_view_profile_screen);
-
 
         // Initialize vars/fields
         usernameView = findViewById(R.id.editprofile_usernameTextView);
@@ -77,10 +75,7 @@ public class ViewProfileScreen extends AppCompatActivity implements GestureDetec
         gestureDetectorCompat = new GestureDetectorCompat(this, this);
         progressBar = findViewById(R.id.progress_loader);
         mainView = findViewById(R.id.viewProfile_mainView);
-
-//        progressView = findViewById(R.id.viewProfile_progressView);
-//        profileView = findViewById(R.id.viewProfile_profileView);
-//        showProgress(true);
+        canvasNoteView = findViewById(R.id.viewprofile_canvasnote);
 
         BasicAWSCredentials credentials = null;
 
@@ -107,7 +102,6 @@ public class ViewProfileScreen extends AppCompatActivity implements GestureDetec
 
             @Override
             protected Void doInBackground(Void... objects) {
-
                 try {
                     Thread.sleep(3000);
                 } catch (InterruptedException e) {
@@ -154,8 +148,9 @@ public class ViewProfileScreen extends AppCompatActivity implements GestureDetec
                 ArrayAdapter adapter = new ArrayAdapter<>(getApplicationContext(), android.R.layout.simple_list_item_1, selectedProfile.getHobbiesAsStrings());
                 listView.setAdapter(adapter);
 
-                // Get the profile image
+                // Get the profile images
                 setupProfileImage();
+                setupCanvasImage();
 
                 // Set the "star" to show if the users are friends.
                 isFriendsWith(selectedUser.getId());
@@ -237,6 +232,42 @@ public class ViewProfileScreen extends AppCompatActivity implements GestureDetec
                 progressBar.setVisibility(show ? View.VISIBLE : View.GONE);
             }
         });
+    }
+
+    private void setupCanvasImage() {
+        if (selectedProfile.getProfileCanvasUri() != null) {
+            AsyncTask<Void, Void, Bitmap> task = new AsyncTask<Void, Void, Bitmap>() {
+                @Override
+                protected Bitmap doInBackground(Void... voids) {
+                    S3Object object;
+                    InputStream objectData = null;
+                    Bitmap bitmap = null;
+
+                    try {
+                        object = s3.getObject(Constants.AWS_PROFILE_IMAGE_BUCKET, selectedProfile.getProfileCanvasUri());
+                        objectData = object.getObjectContent();
+                        bitmap = BitmapFactory.decodeStream(objectData);
+                    } catch (AmazonS3Exception e) {
+                        e.printStackTrace();
+                        Log.i("FILE", "AWS key did not exist for canvas image.");
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        Log.i("FILE", "Error getting canvas image data.");
+                    } finally {
+                        IOUtils.closeQuietly(objectData);
+                    }
+                    return bitmap;
+                }
+
+                @Override
+                protected void onPostExecute(Bitmap bitmap) {
+                    if (bitmap != null) {
+                        canvasNoteView.setImageBitmap(bitmap);
+                    }
+                }
+            };
+            task.execute();
+        }
     }
 
     /**

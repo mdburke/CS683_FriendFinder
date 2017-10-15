@@ -3,6 +3,7 @@ package com.imminentapps.friendfinder.activities;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -99,7 +100,8 @@ public class CreateAccountScreen extends AppCompatActivity {
                 usernameView.getText().toString(), null,
                 firstNameView.getText().toString(),
                 lastNameView.getText().toString(),
-                profileImageUri);
+                profileImageUri,
+                null);
 
         User newUser = new User(emailView.getText().toString(),
                 passwordView.getText().toString(), profile);
@@ -138,15 +140,30 @@ public class CreateAccountScreen extends AppCompatActivity {
             @Override
             public Boolean execute(Void... params) {
                 Boolean[] statuses = new Boolean[3];
-                statuses[0] = validateEmail();
-                statuses[1] = validatePassword();
+
                 statuses[2] = validateUsername();
 
-                for (Boolean status : statuses) {
-                    if (!status) {
-                        return false;
+
+                AsyncTask<Void, Void, Void> newTask = new AsyncTask<Void, Void, Void>() {
+
+                    @Override
+                    protected void onPostExecute(Void aVoid) {
+                        AsyncTask<Void, Void, Void> innerTask = new AsyncTask<Void, Void, Void>() {
+                            @Override
+                            protected Void doInBackground(Void... voids) {
+                                statuses[2] = validateUsername();
+                                return null;
+                            }
+                        };
                     }
-                }
+
+                    @Override
+                    protected Void doInBackground(Void... voids) {
+                        statuses[0] = validatePassword();
+                        statuses[1] = validateEmail();
+                        return null;
+                    }
+                };
 
                 return true;
             }

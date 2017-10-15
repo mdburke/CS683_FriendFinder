@@ -39,6 +39,9 @@ public class Profile implements Serializable {
     @ColumnInfo(name = "profile_image_uri")
     private String profileImageUri;
 
+    @ColumnInfo(name = "profile_canvas_image_uri")
+    private String profileCanvasUri;
+
     @Ignore
     private List<Hobby> hobbies;
 
@@ -46,13 +49,14 @@ public class Profile implements Serializable {
 
     @Ignore
     public Profile(List<Hobby> hobbies, String username, String aboutMeSection,
-                   String firstName, String lastName, String profileImageUri) {
+                   String firstName, String lastName, String profileImageUri, String profileCanvasUri) {
         this.hobbies = (hobbies != null) ? hobbies : new ArrayList<>();
         this.username = username;
         this.aboutMeSection = aboutMeSection;
         this.firstName = firstName;
         this.lastName = lastName;
         this.profileImageUri = profileImageUri;
+        this.profileCanvasUri = profileCanvasUri;
     }
 
     @Ignore
@@ -125,6 +129,14 @@ public class Profile implements Serializable {
 
     public void setProfileId(int profileId) {
         this.profileId = profileId;
+    }
+
+    public String getProfileCanvasUri() {
+        return profileCanvasUri;
+    }
+
+    public void setProfileCanvasUri(String profileCanvasUri) {
+        this.profileCanvasUri = profileCanvasUri;
     }
 
     @Override
