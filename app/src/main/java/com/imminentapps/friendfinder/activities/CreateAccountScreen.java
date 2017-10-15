@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -34,6 +33,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.UUID;
 
+import static com.lemnik.actionchain.ActionCommand.onBackground;
+import static com.lemnik.actionchain.ActionCommand.onForeground;
+
 /**
  * Activity for new user to create account
  */
@@ -55,7 +57,6 @@ public class CreateAccountScreen extends AppCompatActivity {
     private boolean isValidUsername;
     private TransferUtility transferUtility;
     private AmazonS3 s3;
-    private boolean cancel = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -95,63 +96,30 @@ public class CreateAccountScreen extends AppCompatActivity {
         // Array to hold the statuses of the username, password and email validation
         Boolean[] statuses = new Boolean[3];
 
-        // Outer task for doing validation on a background thread.
-        // TODO: Simplify / refactor logic to get out of 'callback hell' here.
-        DatabaseTask<Void, Boolean> task = new DatabaseTask<>(new DatabaseTask.DatabaseTaskListener<Boolean>() {
-            @Override
-            public void onFinished(Boolean result) {
-
-            }
-        }, new DatabaseTask.DatabaseTaskQuery<Void, Boolean>() {
-            @Override
-            public Boolean execute(Void... params) {
-                statuses[0] = validatePassword();
-
-                // Array to hold the results of the various validations
-                AsyncTask<Void, Void, Void> newTask = new AsyncTask<Void, Void, Void>() {
-
-                    @Override
-                    protected void onPostExecute(Void aVoid) {
-                        AsyncTask<Void, Void, Void> innerTask = new AsyncTask<Void, Void, Void>() {
-                            @Override
-                            protected Void doInBackground(Void... voids) {
-                                statuses[2] = validateUsername();
-                                return null;
+        try {
+            onBackground((Void) -> statuses[0] = validatePassword())
+                    .then(onBackground((Void) -> statuses[1] = validateUsername()))
+                    .then(onBackground((Void) -> statuses[2] = validateEmail()))
+                    .then(onForeground((Void) -> {
+                        boolean cancel = false;
+                        for (Boolean status : statuses) {
+                            if (!status) {
+                                cancel = true;
+                                break;
                             }
-
-                            @Override
-                            protected void onPostExecute(Void aVoid) {
-                                for (Boolean status : statuses) {
-                                    if (!status) {
-                                        cancel = true;
-                                        return;
-                                    }
-                                }
-                                cancel = false;
-                                navigateToHome();
-                            }
-                        };
-                        innerTask.execute();
-                    }
-
-                    @Override
-                    protected Void doInBackground(Void... voids) {
-                        statuses[1] = validateEmail();
-                        return null;
-                    }
-                };
-
-                newTask.execute();
-                return true;
-            }
-        });
-        task.execute();
+                        }
+                        navigateToHome(cancel);
+                    }))
+                    .exec();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     /**
      *  Method that will kick off navigation to the home screen as long as it has not been cancelled
      */
-    private void navigateToHome() {
+    private void navigateToHome(boolean cancel) {
         if (!cancel) {
             // Create the new profile and user with the given information
             Profile profile = new Profile(null,
@@ -213,23 +181,7 @@ public class CreateAccountScreen extends AppCompatActivity {
      */
     private boolean validateEmail() {
         String email = emailView.getText().toString();
-        DatabaseTask<String, Boolean> task = new DatabaseTask<>(new DatabaseTask.DatabaseTaskListener<Boolean>() {
-            @Override
-            public void onFinished(Boolean result) {
-                if (!email.contains("@") || result) {
-                    emailView.setError("Invalid email address!");
-                    emailView.requestFocus();
-                }
-                isValidEmail = result;
-            }
-        }, new DatabaseTask.DatabaseTaskQuery<String, Boolean>() {
-            @Override
-            public Boolean execute(String... emails) {
-                return db.userDao().findByEmail(emails[0]) != null;
-            }
-        });
-        task.execute(email);
-        return isValidEmail;
+        return db.userDao().findByEmail(email) == null;
     }
 
     /**
@@ -238,12 +190,7 @@ public class CreateAccountScreen extends AppCompatActivity {
      * TODO: add a more advanced regex check for a valid password with more requirements.
      */
     private boolean validatePassword() {
-        if (passwordView.getText().length() < 5) {
-            passwordView.setError("Invalid password!");
-            passwordView.requestFocus();
-            return false;
-        }
-        return true;
+        return passwordView.getText().length() >= 5;
     }
 
     /**
@@ -252,24 +199,7 @@ public class CreateAccountScreen extends AppCompatActivity {
      */
     private boolean validateUsername() {
         String username = usernameView.getText().toString();
-
-        DatabaseTask<String, Boolean> task = new DatabaseTask<>(new DatabaseTask.DatabaseTaskListener<Boolean>() {
-            @Override
-            public void onFinished(Boolean result) {
-                if (username.length() < 5 || result) {
-                    usernameView.setError("Invalid username!");
-                    usernameView.requestFocus();
-                }
-                isValidUsername = result;
-            }
-        }, new DatabaseTask.DatabaseTaskQuery<String, Boolean>() {
-            @Override
-            public Boolean execute(String... emails) {
-                return db.profileDao().findByUsername(username) != null;
-            }
-        });
-        task.execute(username);
-        return isValidUsername;
+        return db.profileDao().findByUsername(username) == null;
     }
 
     /**
