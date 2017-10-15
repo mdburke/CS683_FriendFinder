@@ -88,6 +88,13 @@ public class ViewProfileScreen extends AppCompatActivity implements GestureDetec
     }
 
     @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        boolean handled = super.dispatchTouchEvent(ev);
+        handled = gestureDetectorCompat.onTouchEvent(ev);
+        return handled;
+    }
+
+    @Override
     protected void onStart() {
         super.onStart();
 
@@ -110,7 +117,6 @@ public class ViewProfileScreen extends AppCompatActivity implements GestureDetec
             }
         };
         task.execute();
-
     }
 
     /**
@@ -176,7 +182,6 @@ public class ViewProfileScreen extends AppCompatActivity implements GestureDetec
                 return currentUser.isFriendsWith(ids[0], getApplicationContext());
             }
         });
-
         task.execute(userId);
     }
 
@@ -204,7 +209,6 @@ public class ViewProfileScreen extends AppCompatActivity implements GestureDetec
                 return UserUtil.loadUser(emails[0]);
             }
         });
-
         task.execute(email);
     }
 
@@ -312,7 +316,6 @@ public class ViewProfileScreen extends AppCompatActivity implements GestureDetec
                     showProgress(false);
                 }
             };
-
             task.execute();
         }
     }

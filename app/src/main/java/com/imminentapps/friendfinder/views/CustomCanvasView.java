@@ -91,7 +91,6 @@ public class CustomCanvasView extends View {
         invalidate();
     }
 
-
     public boolean myOnTouchEvent(MotionEvent event) {
         float x = event.getX();
         float y = event.getY();
