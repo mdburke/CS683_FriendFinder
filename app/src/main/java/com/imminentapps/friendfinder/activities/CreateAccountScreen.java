@@ -1,6 +1,8 @@
 package com.imminentapps.friendfinder.activities;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -21,9 +23,9 @@ import com.imminentapps.friendfinder.database.AppDatabase;
 import com.imminentapps.friendfinder.database.DatabaseTask;
 import com.imminentapps.friendfinder.domain.Profile;
 import com.imminentapps.friendfinder.domain.User;
+import com.imminentapps.friendfinder.utils.AWSCredentialsUtil;
 import com.imminentapps.friendfinder.utils.Constants;
 import com.imminentapps.friendfinder.utils.DBUtil;
-import com.imminentapps.friendfinder.utils.AWSCredentialsUtil;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -46,13 +48,14 @@ public class CreateAccountScreen extends AppCompatActivity {
     private TextView firstNameView;
     private TextView lastNameView;
     private Button createAccountButton;
-    private String profileImageUri;
 
     // Instance vars
     private boolean isValidEmail;
+    private String profileImageUri;
     private boolean isValidUsername;
     private TransferUtility transferUtility;
     private AmazonS3 s3;
+    private boolean cancel = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,6 +75,7 @@ public class CreateAccountScreen extends AppCompatActivity {
         createAccountButton.setOnClickListener((view -> createAccountAndNavigateHome()));
         BasicAWSCredentials credentials = null;
 
+        // Setup Amazon S3 creds
         try {
              credentials = new BasicAWSCredentials(
                     AWSCredentialsUtil.getCreds("AccessKey", getApplicationContext()),
@@ -89,61 +93,28 @@ public class CreateAccountScreen extends AppCompatActivity {
      */
     private void createAccountAndNavigateHome() {
         // Guard Clause
-        try {
-            validateData();
-        } catch (IllegalArgumentException e) {
-            return;
-        }
-
-        // Create the new profile and user with the given information
-        Profile profile = new Profile(null,
-                usernameView.getText().toString(), null,
-                firstNameView.getText().toString(),
-                lastNameView.getText().toString(),
-                profileImageUri,
-                null);
-
-        User newUser = new User(emailView.getText().toString(),
-                passwordView.getText().toString(), profile);
-
-        DatabaseTask<User, String> task = new DatabaseTask<>(new DatabaseTask.DatabaseTaskListener<String>() {
-            @Override
-            public void onFinished(String email) {
-                // Navigate to the HomeScreen as if the user has just logged in
-                Intent intent = new Intent(getApplicationContext(), HomeScreen.class);
-                intent.putExtra("currentUserEmail", email);
-                startActivity(intent);
-            }
-        }, new DatabaseTask.DatabaseTaskQuery<User, String>() {
-            @Override
-            public String execute(User... users) {
-                // Add the user to the Database
-                // TODO: Figure out how to do this all in one transaction
-                db.userDao().insertUsers(users[0]);
-                db.profileDao().insert(users[0].getProfile());
-                return users[0].getEmail();
-            }
-        });
-
-        task.execute(newUser);
+        validateData();
     }
 
+    /**
+     * Parent method for validating username, password and email address
+     * @throws IllegalArgumentException
+     */
     private void validateData() throws IllegalArgumentException {
+        Boolean[] statuses = new Boolean[3];
+
+        // Outer task for doing validation on a background thread.
         DatabaseTask<Void, Boolean> task = new DatabaseTask<>(new DatabaseTask.DatabaseTaskListener<Boolean>() {
             @Override
             public void onFinished(Boolean result) {
-                if (!result) {
-                    throw new IllegalArgumentException("Invalid user data entered.");
-                }
+
             }
         }, new DatabaseTask.DatabaseTaskQuery<Void, Boolean>() {
             @Override
             public Boolean execute(Void... params) {
-                Boolean[] statuses = new Boolean[3];
+                statuses[0] = validatePassword();
 
-                statuses[2] = validateUsername();
-
-
+                // Array to hold the results of the various validations
                 AsyncTask<Void, Void, Void> newTask = new AsyncTask<Void, Void, Void>() {
 
                     @Override
@@ -154,23 +125,89 @@ public class CreateAccountScreen extends AppCompatActivity {
                                 statuses[2] = validateUsername();
                                 return null;
                             }
+
+                            @Override
+                            protected void onPostExecute(Void aVoid) {
+                                for (Boolean status : statuses) {
+                                    if (!status) {
+                                        cancel = true;
+                                        return;
+                                    }
+                                }
+                                cancel = false;
+                                navigateToHome();
+                            }
                         };
+                        innerTask.execute();
                     }
 
                     @Override
                     protected Void doInBackground(Void... voids) {
-                        statuses[0] = validatePassword();
                         statuses[1] = validateEmail();
                         return null;
                     }
                 };
 
+                newTask.execute();
                 return true;
             }
         });
         task.execute();
     }
 
+    private void navigateToHome() {
+        if (!cancel) {
+            // Create the new profile and user with the given information
+            Profile profile = new Profile(null,
+                    usernameView.getText().toString(), null,
+                    firstNameView.getText().toString(),
+                    lastNameView.getText().toString(),
+                    profileImageUri,
+                    null);
+
+            User newUser = new User(emailView.getText().toString(),
+                    passwordView.getText().toString(), profile);
+
+            // Database Task to add the user to the DB and navigate to the home activity
+            DatabaseTask<User, String> task = new DatabaseTask<>(new DatabaseTask.DatabaseTaskListener<String>() {
+                @Override
+                public void onFinished(String email) {
+                    // Navigate to the HomeScreen as if the user has just logged in
+                    Intent intent = new Intent(getApplicationContext(), HomeScreen.class);
+                    intent.putExtra("currentUserEmail", email);
+                    startActivity(intent);
+                }
+            }, new DatabaseTask.DatabaseTaskQuery<User, String>() {
+                @Override
+                public String execute(User... users) {
+                    // Add the user to the Database
+                    // TODO: Figure out how to do this all in one transaction
+                    db.userDao().insertUsers(users[0]);
+                    db.profileDao().insert(users[0].getProfile());
+                    return users[0].getEmail();
+                }
+            });
+
+            task.execute(newUser);
+        } else {
+            AlertDialog.Builder alertBuilder = new AlertDialog.Builder(CreateAccountScreen.this);
+            alertBuilder
+                    .setTitle("Invalid Arguments")
+                    .setMessage("Incorrect username or email address")
+                    .setCancelable(false)
+                    .setNegativeButton("Return",
+                            new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    dialogInterface.cancel();
+                                }
+                            }
+                    );
+
+            AlertDialog alertDialog = alertBuilder.create();
+            alertDialog.show();
+        }
+    }
     /**
      * Method checks if email has an '@' symbol and also checks if the email is already
      * in the database.
