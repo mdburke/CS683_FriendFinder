@@ -137,18 +137,18 @@ public class SearchForFriendsScreen extends AppCompatActivity implements Activit
      */
     private void initializeUserLists() {
 
-        DatabaseTask<Void, Void> task = new DatabaseTask<>(new DatabaseTask.DatabaseTaskListener() {
+        DatabaseTask<Void, Void> task = new DatabaseTask<>(new DatabaseTask.DatabaseTaskListener<Void>() {
             @Override
-            public void onFinished(Object result) {
+            public void onFinished(Void result) {
                 // Setup spinner
                 initializeSpinner();
 
                 // Setup RecyclerView
                 initializeRecyclerView();
             }
-        }, new DatabaseTask.DatabaseTaskQuery() {
+        }, new DatabaseTask.DatabaseTaskQuery<Void, Void>() {
             @Override
-            public Object execute(Object[] params) {
+            public Void execute(Void... params) {
                 // Set initial allUsers in list
                 allUsers = new ArrayList<>();
                 allUsers.addAll(db.userDao().getAll());

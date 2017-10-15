@@ -8,7 +8,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -64,7 +63,6 @@ public class EditProfileScreen extends AppCompatActivity {
         setContentView(R.layout.activity_edit_profile_screen);
         db = DBUtil.getDBInstance();
 
-
         // Initialize vars/fields
         usernameView = findViewById(R.id.editprofile_usernameTextView);
         aboutMeView = findViewById(R.id.editprofile_aboutMeEdit);
@@ -75,12 +73,11 @@ public class EditProfileScreen extends AppCompatActivity {
 
         // Add onClickListeners
         saveButton.setOnClickListener(view -> saveButtonClicked());
-        canvasView.setOnTouchListener(new CustomCanvasView.OnTouchListener() {
-            public boolean onTouch(View v, MotionEvent e) {
-                return ((CustomCanvasView) v).myOnTouchEvent(e);
-            }
-        });
 
+        // Add onTouchListeners
+        canvasView.setOnTouchListener((v, e) -> ((CustomCanvasView) v).myOnTouchEvent(e));
+
+        // Grab the user data from the intent
         initializeUserData();
 
         BasicAWSCredentials credentials = null;
@@ -94,10 +91,6 @@ public class EditProfileScreen extends AppCompatActivity {
         }
         s3 = new AmazonS3Client(credentials);
         transferUtility = new TransferUtility(s3, getApplicationContext());
-    }
-
-    public void clearCanvas(View v) {
-        canvasView.clearCanvas();
     }
 
     private void initializeUserData() {
@@ -129,6 +122,15 @@ public class EditProfileScreen extends AppCompatActivity {
         task.execute(email);
     }
 
+    /**
+     * Clears the custom canvasView canvas
+     * @param v
+     */
+    public void clearCanvas(View v) {
+        canvasView.clearCanvas();
+    }
+
+    // Saves all the various data for the user.
     private void saveButtonClicked() {
         // Get the new data to save
         int profileId = currentUser.getProfile().getProfileId();
@@ -172,6 +174,10 @@ public class EditProfileScreen extends AppCompatActivity {
         saveImageTask.execute();
     }
 
+    /**
+     * Posts the contents of the canvas view to a bitmap on S3 for recovery later.
+     * Saves the URI to the user's profile.
+     */
     private void saveCanvasView() {
         FileOutputStream outputStream = null;
 
@@ -179,7 +185,8 @@ public class EditProfileScreen extends AppCompatActivity {
         String filename = currentUser.getEmail().concat("_canvasImage_").concat(UUID.randomUUID().toString());
 
         try {
-            // Adapted from https://stackoverflow.com/questions/2227209/how-to-get-the-images-from-device-in-android-java-application and
+            // Adapted from https://stackoverflow.com/questions/2227209/how-to-get-the-images-from-device-in-android-java-application
+            // and
             // https://stackoverflow.com/questions/7769806/convert-bitmap-to-file
 
             // Convert bitmap to byte array

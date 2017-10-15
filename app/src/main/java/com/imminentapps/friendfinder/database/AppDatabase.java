@@ -47,7 +47,4 @@ public abstract class AppDatabase extends RoomDatabase {
         INSTANCE.close();
         INSTANCE = null;
     }
-
-
-
 }

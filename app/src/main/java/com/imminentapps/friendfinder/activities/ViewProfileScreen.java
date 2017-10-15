@@ -22,7 +22,6 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.mobileconnectors.s3.transferutility.TransferUtility;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.AmazonS3Exception;
@@ -55,7 +54,6 @@ public class ViewProfileScreen extends AppCompatActivity implements GestureDetec
     private TextView usernameView;
     private ListView listView;
     private TextView aboutMeView;
-    private TransferUtility transferUtility;
     private AmazonS3 s3;
     private ProgressBar progressBar;
     private View mainView;
@@ -87,13 +85,13 @@ public class ViewProfileScreen extends AppCompatActivity implements GestureDetec
             e.printStackTrace();
         }
         s3 = new AmazonS3Client(credentials);
-        transferUtility = new TransferUtility(s3, getApplicationContext());
     }
 
     @Override
     protected void onStart() {
         super.onStart();
 
+        // AsyncTask that will kick off the progress bar while the user profile is loading
         AsyncTask<Void, Void, Void> task = new AsyncTask<Void, Void, Void>() {
             @Override
             protected void onPreExecute() {
@@ -102,11 +100,6 @@ public class ViewProfileScreen extends AppCompatActivity implements GestureDetec
 
             @Override
             protected Void doInBackground(Void... objects) {
-                try {
-                    Thread.sleep(3000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
                 initializeCurrentUserData();
                 initializeSelectedUserData();
                 return null;
@@ -120,11 +113,10 @@ public class ViewProfileScreen extends AppCompatActivity implements GestureDetec
 
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-    }
-
+    /**
+     * Initialize the viewed user data by making a DB query.
+     * Also kicks off the queries to grab the images for the profile and setup the progress bar.
+     */
     private void initializeSelectedUserData() {
         // Grab the user information from the database based on the email passed in
         Intent intent = getIntent();
@@ -156,23 +148,6 @@ public class ViewProfileScreen extends AppCompatActivity implements GestureDetec
                 isFriendsWith(selectedUser.getId());
             }
 
-            private void isFriendsWith(int userId) {
-                DatabaseTask<Integer, Boolean> task = new DatabaseTask<>(new DatabaseTask.DatabaseTaskListener<Boolean>() {
-                    @Override
-                    public void onFinished(Boolean result) {
-                        if (!result) {
-                            friendIcon.setVisibility(View.INVISIBLE);
-                        }
-                    }
-                }, new DatabaseTask.DatabaseTaskQuery<Integer, Boolean>() {
-                    @Override
-                    public Boolean execute(Integer... ids) {
-                        return currentUser.isFriendsWith(ids[0], getApplicationContext());
-                    }
-                });
-
-                task.execute(userId);
-            }
         }, new DatabaseTask.DatabaseTaskQuery<String, User>() {
             @Override
             public User execute(String... emails) {
@@ -183,6 +158,31 @@ public class ViewProfileScreen extends AppCompatActivity implements GestureDetec
         task.execute(email);
     }
 
+    /**
+     * DatabaseTask that checks the DB to find out if the current user and the viewed user are friends.
+     * @param userId
+     */
+    private void isFriendsWith(int userId) {
+        DatabaseTask<Integer, Boolean> task = new DatabaseTask<>(new DatabaseTask.DatabaseTaskListener<Boolean>() {
+            @Override
+            public void onFinished(Boolean result) {
+                if (!result) {
+                    friendIcon.setVisibility(View.INVISIBLE);
+                }
+            }
+        }, new DatabaseTask.DatabaseTaskQuery<Integer, Boolean>() {
+            @Override
+            public Boolean execute(Integer... ids) {
+                return currentUser.isFriendsWith(ids[0], getApplicationContext());
+            }
+        });
+
+        task.execute(userId);
+    }
+
+    /**
+     * Database Task method that grabs the current user information.
+     */
     private void initializeCurrentUserData() {
         // Grab the user information from the database based on the email passed in
         Intent intent = getIntent();
@@ -209,7 +209,7 @@ public class ViewProfileScreen extends AppCompatActivity implements GestureDetec
     }
 
     /**
-     * Shows the progress UI and hides the login form.
+     * Shows/hides the progress UI and hides/shows the main view
      */
     private void showProgress(final boolean show) {
         // Use these APIs to fade-in the progress spinner.
@@ -234,6 +234,9 @@ public class ViewProfileScreen extends AppCompatActivity implements GestureDetec
         });
     }
 
+    /**
+     * Grabs the Canvas Image from S3
+     */
     private void setupCanvasImage() {
         if (selectedProfile.getProfileCanvasUri() != null) {
             AsyncTask<Void, Void, Bitmap> task = new AsyncTask<Void, Void, Bitmap>() {
@@ -273,6 +276,8 @@ public class ViewProfileScreen extends AppCompatActivity implements GestureDetec
     /**
      * Grabs the profile image from the file system, transforms to Bitmap
      * and set the profileImageView to that bitmap.
+     *
+     * When the profile image has been grabbed, we shutoff the progress bar and show the UI.
      */
     private void setupProfileImage() {
         // TODO: Add a default image if bitmap is null or the uri is null

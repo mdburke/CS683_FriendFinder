@@ -92,18 +92,11 @@ public class CreateAccountScreen extends AppCompatActivity {
      * this creates the new user, adds it to the mock DB, and navigates to the home screen.
      */
     private void createAccountAndNavigateHome() {
-        // Guard Clause
-        validateData();
-    }
-
-    /**
-     * Parent method for validating username, password and email address
-     * @throws IllegalArgumentException
-     */
-    private void validateData() throws IllegalArgumentException {
+        // Array to hold the statuses of the username, password and email validation
         Boolean[] statuses = new Boolean[3];
 
         // Outer task for doing validation on a background thread.
+        // TODO: Simplify / refactor logic to get out of 'callback hell' here.
         DatabaseTask<Void, Boolean> task = new DatabaseTask<>(new DatabaseTask.DatabaseTaskListener<Boolean>() {
             @Override
             public void onFinished(Boolean result) {
@@ -155,6 +148,9 @@ public class CreateAccountScreen extends AppCompatActivity {
         task.execute();
     }
 
+    /**
+     *  Method that will kick off navigation to the home screen as long as it has not been cancelled
+     */
     private void navigateToHome() {
         if (!cancel) {
             // Create the new profile and user with the given information
@@ -208,6 +204,7 @@ public class CreateAccountScreen extends AppCompatActivity {
             alertDialog.show();
         }
     }
+
     /**
      * Method checks if email has an '@' symbol and also checks if the email is already
      * in the database.
